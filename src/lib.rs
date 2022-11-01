@@ -1,16 +1,13 @@
-use std::error::Error;
+// Relative imports of sub modules
+pub use crate::decision::Decision;
+pub use crate::optimizely::Optimizely;
+pub use crate::user_context::{Attributes, UserContext};
 
-#[derive(Debug)]
-pub struct Optimizely {
-    pub initialized: bool,
-}
+// Macro module
+#[macro_use]
+mod macros;
 
-impl Optimizely {
-    pub fn build(datafile: &str) -> Result<Optimizely, Box<dyn Error>> {
-        let parsed = json::parse(datafile)?;
-
-        println!("{:?}", parsed);
-
-        Ok(Optimizely { initialized: true })
-    }
-}
+// Regular modules
+mod decision;
+mod optimizely;
+mod user_context;
