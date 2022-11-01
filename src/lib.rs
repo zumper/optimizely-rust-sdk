@@ -1,14 +1,16 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
+use std::error::Error;
+
+#[derive(Debug)]
+pub struct Optimizely {
+    pub initialized: bool,
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+impl Optimizely {
+    pub fn build(datafile: &str) -> Result<Optimizely, Box<dyn Error>> {
+        let parsed = json::parse(datafile)?;
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
+        println!("{:?}", parsed);
+
+        Ok(Optimizely { initialized: true })
     }
 }
