@@ -2,8 +2,9 @@
 use std::fs::File;
 use std::io::Read;
 // Imports from this crate
+use optimizely::client::Client;
 use optimizely::user_attributes;
-use optimizely::{Client, UserAttributes};
+use optimizely::user_context::UserAttributes;
 
 const FILE_PATH: &str = "tests/datafile.example.json";
 
@@ -31,8 +32,14 @@ fn client_initialization() {
     let client = client();
 
     // Check property on client
-    assert_eq!(client.account_id, "21537940595");
-    assert_eq!(client.revision, 73);
+    assert_eq!(client.account_id(), "21537940595");
+    assert_eq!(client.revision(), 73);
+
+    let flags = client.feature_flags();
+
+    // Check if flags are there
+    assert_eq!(flags.len(), 6);
+    assert!(flags.iter().any(|flag| flag.key == "buy_button"));
 }
 
 #[test]

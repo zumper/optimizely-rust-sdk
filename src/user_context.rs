@@ -1,8 +1,7 @@
 // External imports
 use std::collections::HashMap;
 // Imports from parent
-use super::DecideOption;
-use super::Decision;
+use super::decision::{DecideOption, Decision};
 
 // Custom type alias
 pub type UserAttributes = HashMap<String, String>;
