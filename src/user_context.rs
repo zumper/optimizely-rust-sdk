@@ -1,15 +1,18 @@
 // External imports
 use std::collections::HashMap;
 // Imports from parent
+use super::DecideOption;
 use super::Decision;
 
 // Custom type alias
-pub type Attributes = HashMap<String, String>;
+pub type UserAttributes = HashMap<String, String>;
+
+// Inspiration: https://docs.developers.optimizely.com/experimentation/v4.0.0-full-stack/docs/optimizelyusercontext-python
 
 #[derive(Debug)]
 pub struct UserContext {
     user_id: String,
-    attributes: Attributes,
+    attributes: UserAttributes,
 }
 
 impl UserContext {
@@ -32,16 +35,20 @@ impl UserContext {
         self.attributes.insert(key, value);
     }
 
-    pub fn get_attributes(&self) -> &Attributes {
+    pub fn get_attributes(&self) -> &UserAttributes {
         // Return borrowed reference to attributes
         &self.attributes
     }
 
-    pub fn decide(&self, flag_key: &str) -> Decision {
+    pub fn decide<'a>(&'a self, flag_key: &'a str, _options: Vec<DecideOption>) -> Decision {
         // TODO: remove these two lines
         let _ = &self.user_id;
         drop(flag_key);
 
-        Decision {}
+        Decision {
+            flag_key,
+            variation_key: "??",
+            enabled: true,
+        }
     }
 }
