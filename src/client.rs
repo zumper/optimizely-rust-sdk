@@ -1,7 +1,10 @@
+//! Everything related to make web requests to Optimizely
+
 // External imports
+use std::collections::HashMap;
 use std::error::Error;
 // Imports from parent
-use super::datafile::{DatafileError, FeatureFlag};
+use super::datafile::{DatafileError, FeatureFlag, Rollout};
 use super::user_context::UserContext;
 
 #[derive(Debug)]
@@ -16,8 +19,6 @@ impl Client {
         // Parse datafile as JSON
         let mut datafile = json::parse(datafile)?;
 
-        // TODO: read out parsed JSON
-
         // Get account id as string
         let account_id = string_field!(datafile, "accountId")?;
 
@@ -26,12 +27,19 @@ impl Client {
             .parse::<u32>()
             .map_err(|_| DatafileError::InvalidRevision)?;
 
+        // Get list of rollouts
+        let rollout_closure = |value| Rollout::build(value);
+        let rollout_vector = list_field!(datafile, "rollouts", rollout_closure)?;
+
+        // Convert list to hashmap of rollouts, to make it easier to look up
+        let mut rollout_map: HashMap<String, Rollout> = rollout_vector
+            .into_iter()
+            .map(|rollout| (rollout.id.clone(), rollout))
+            .collect();
+
         // Get list of feature flags
-        let feature_flags: Vec<FeatureFlag> = datafile["featureFlags"]
-            .take()
-            .members_mut()
-            .map(|value| FeatureFlag::build(value))
-            .collect::<Result<Vec<_>, _>>()?;
+        let flag_closure = |value| FeatureFlag::build(value, &mut rollout_map);
+        let feature_flags: Vec<FeatureFlag> = list_field!(datafile, "featureFlags", flag_closure)?;
 
         Ok(Client {
             account_id,

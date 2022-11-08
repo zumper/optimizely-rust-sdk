@@ -1,3 +1,5 @@
+//! Optimizely Feature Experimentation SDK
+
 // Macro module
 #[macro_use]
 mod macros;

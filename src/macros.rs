@@ -17,6 +17,16 @@ macro_rules! string_field {
     ($value: ident, $name: expr) => {
         $value[$name]
             .take_string()
-            .ok_or(DatafileError::MissingField($name))
+            .ok_or(DatafileError::MissingField(String::from($name)))
+    };
+}
+
+macro_rules! list_field {
+    ($value: ident, $name: expr, $closure: expr) => {
+        $value[$name]
+            .take()
+            .members_mut()
+            .map($closure)
+            .collect::<Result<Vec<_>, _>>()
     };
 }

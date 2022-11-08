@@ -3,12 +3,13 @@ use std::error::Error;
 use std::fmt::{Display, Formatter, Result};
 
 #[derive(Debug, PartialEq)]
-pub enum DatafileError<'a> {
-    MissingField(&'a str),
+pub enum DatafileError {
+    MissingField(String),
     InvalidRevision,
+    InvalidRolloutId(String),
 }
 
-impl Display for DatafileError<'_> {
+impl Display for DatafileError {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         match self {
             DatafileError::MissingField(field) => {
@@ -17,8 +18,11 @@ impl Display for DatafileError<'_> {
             DatafileError::InvalidRevision => {
                 write!(f, "Revision is not parsable as integer")
             }
+            DatafileError::InvalidRolloutId(id) => {
+                write!(f, "Rollout ID does not exist: {:?}", id)
+            }
         }
     }
 }
 
-impl Error for DatafileError<'_> {}
+impl Error for DatafileError {}
