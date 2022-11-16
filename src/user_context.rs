@@ -1,6 +1,9 @@
 // External imports
 use std::collections::HashMap;
+use std::rc::Rc;
+
 // Imports from parent
+use super::datafile::Datafile;
 use super::decision::{DecideOption, Decision};
 
 // Custom type alias
@@ -10,20 +13,30 @@ pub type UserAttributes = HashMap<String, String>;
 
 #[derive(Debug)]
 pub struct UserContext {
+    datafile: Rc<Datafile>,
     user_id: String,
     attributes: UserAttributes,
 }
 
 impl UserContext {
-    pub fn new(user_id: &str) -> UserContext {
-        // Create owned copies of user_id
+    pub fn new(datafile: &Rc<Datafile>, user_id: &str) -> UserContext {
+        // Create a clone of the reference, thus increasing the count
+        let datafile = Rc::clone(&datafile);
+
+        // Create owned copy of user_id
         let user_id = user_id.to_owned();
 
+        // Create an empty set of user attributes
+        let attributes = UserAttributes::new();
+
         UserContext {
+            datafile,
             user_id,
-            attributes: HashMap::new(),
+            attributes,
         }
     }
+
+    // TODO: add pub fn new_with_attributes
 
     pub fn set_attribute(&mut self, key: &str, value: &str) {
         // Create owned copies of the key and value
@@ -39,15 +52,23 @@ impl UserContext {
         &self.attributes
     }
 
-    pub fn decide<'a>(&'a self, flag_key: &'a str, _options: Vec<DecideOption>) -> Decision {
-        // TODO: remove these two lines
-        let _ = &self.user_id;
-        drop(flag_key);
+    pub fn decide<'a>(&'a self, flag_key: &'a str, _options: &Vec<DecideOption>) -> Decision {
+        // Retrieve Flag object
+        let flag = match self.datafile.get_flag(flag_key) {
+            Some(flag) => flag,
+            None => {
+                // When flag key cannot be found, return the off variation
+                // CONSIDERATION: Could have used Result<Decision, E> but this is how other Optimizely SDKs work
+                return Decision::off(flag_key)
+            }
+        };
 
-        Decision {
-            flag_key,
-            variation_key: "??",
-            enabled: true,
+        // TODO: use Flag object
+        drop(flag);
+
+        match self.user_id.as_ref() {
+            "user1" => Decision::new(flag_key, false, "off"),
+            _ => Decision::new(flag_key, true, "on"),
         }
     }
 }

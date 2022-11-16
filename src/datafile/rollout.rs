@@ -14,7 +14,8 @@ impl Rollout {
 
         let experiments = list_field!(value, "experiments", |_| Ok(()))?;
 
-        dbg!(experiments.len());
+        // TODO: store experiments
+        drop(experiments);
 
         let rollout = Rollout { id };
         Ok(rollout)

@@ -34,9 +34,9 @@
             "variations": [
               {
                 "variables": [],
-                "id": "58054",
-                "key": "on",
-                "featureEnabled": true
+                "id": "58053",
+                "key": "off",
+                "featureEnabled": false
               }
             ],
             "forcedVariations": {},
@@ -44,7 +44,7 @@
             "layerId": "rollout-19334-21533480907",
             "trafficAllocation": [
               {
-                "entityId": "58054",
+                "entityId": "58053",
                 "endOfRange": 10000
               }
             ],

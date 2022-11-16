@@ -61,15 +61,38 @@ fn user_context_set_attribute_method() {
 }
 
 #[test]
-fn user_context_decide_method() {
+fn decision_qa_rollout_flag() {
     let client = client();
-    let user_context = client.create_user_context("user123");
 
     let flag_key = "qa_rollout";
+    let decide_options = Vec::new();
 
-    let decision = user_context.decide(flag_key, Vec::new());
+    // The flag should be off for `user1 `
+    let user_context = client.create_user_context("user1");
+    let decision = user_context.decide(flag_key, &decide_options);
+    assert!(!decision.enabled());
+    assert_eq!(decision.variation_key(), "off");
 
-    // TODO: assert_eq variation_key
-    assert!(decision.enabled);
-    assert_eq!(decision.flag_key, flag_key);
+    // The flag should be on for `user3 `
+    let user_context = client.create_user_context("user3");
+    let decision = user_context.decide(flag_key, &decide_options);
+    assert!(decision.enabled());
+    assert_eq!(decision.variation_key(), "on");
+}
+
+#[test]
+fn decision_invalid_flag() {
+    let client = client();
+
+    let flag_key = "this_flag_does_not_exist";
+    let decide_options = Vec::new();
+
+    // An invalid flag should always be disabled
+    let user_context = client.create_user_context("_");
+    let decision = user_context.decide(flag_key, &decide_options);
+
+    // TODO: make this test fail by implementing the hashmap on flags
+    drop(decision);
+    // assert!(!decision.enabled());
+    // assert_eq!(decision.variation_key(), "off");
 }
