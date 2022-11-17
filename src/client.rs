@@ -33,8 +33,8 @@ impl Client {
         self.datafile.revision()
     }
 
-    pub fn feature_flags(&self) -> &Vec<FeatureFlag> {
-        &self.datafile.feature_flags()
+    pub fn feature_flags(&self) -> Vec<&FeatureFlag> {
+        self.datafile.feature_flags()
     }
 
     pub fn create_user_context(&self, user_id: &str) -> UserContext {

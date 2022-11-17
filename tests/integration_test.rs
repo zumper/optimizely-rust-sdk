@@ -6,7 +6,7 @@ use optimizely::client::Client;
 use optimizely::user_attributes;
 use optimizely::user_context::UserAttributes;
 
-const FILE_PATH: &str = "tests/datafile.example.json";
+const FILE_PATH: &str = "examples/datafile.json";
 
 fn client() -> Client {
     // Read datafile from local path
@@ -40,10 +40,11 @@ fn client_initialization() {
     // Check if flags are there
     assert_eq!(flags.len(), 6);
     assert!(flags.iter().any(|flag| flag.key == "buy_button"));
+    assert!(flags.iter().any(|flag| flag.key == "qa_rollout"));
 }
 
 #[test]
-fn user_context_set_attribute_method() {
+fn user_context_attributes() {
     let client = client();
     let mut user_context = client.create_user_context("user123");
 
@@ -90,9 +91,6 @@ fn decision_invalid_flag() {
     // An invalid flag should always be disabled
     let user_context = client.create_user_context("_");
     let decision = user_context.decide(flag_key, &decide_options);
-
-    // TODO: make this test fail by implementing the hashmap on flags
-    drop(decision);
-    // assert!(!decision.enabled());
-    // assert_eq!(decision.variation_key(), "off");
+    assert!(!decision.enabled());
+    assert_eq!(decision.variation_key(), "off");
 }

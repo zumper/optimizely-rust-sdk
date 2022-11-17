@@ -17,7 +17,7 @@ mod rollout;
 pub struct Datafile {
     account_id: String,
     revision: u32,
-    feature_flags: Vec<FeatureFlag>,
+    feature_flags: HashMap<String, FeatureFlag>,
 }
 
 impl Datafile {
@@ -45,7 +45,12 @@ impl Datafile {
 
         // Get list of feature flags
         let flag_closure = |value| FeatureFlag::build(value, &mut rollout_map);
-        let feature_flags: Vec<FeatureFlag> = list_field!(datafile, "featureFlags", flag_closure)?;
+        let flag_vector = list_field!(datafile, "featureFlags", flag_closure)?;
+
+        let feature_flags: HashMap<String, FeatureFlag> = flag_vector
+            .into_iter()
+            .map(|flag| (flag.key.clone(), flag))
+            .collect();
 
         Ok(Datafile {
             account_id,
@@ -62,12 +67,11 @@ impl Datafile {
         self.revision
     }
 
-    pub fn feature_flags(&self) -> &Vec<FeatureFlag> {
-        &self.feature_flags
+    pub fn feature_flags(&self) -> Vec<&FeatureFlag> {
+        self.feature_flags.values().collect()
     }
 
-    pub fn get_flag(&self, _flag_key: &str) -> Option<&FeatureFlag> {
-        // TODO: switch feature_flag to a hashmap in order to retrieve the correct flag
-        self.feature_flags.get(0)
+    pub fn get_flag(&self, flag_key: &str) -> Option<&FeatureFlag> {
+        self.feature_flags.get(flag_key)
     }
 }
