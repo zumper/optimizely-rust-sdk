@@ -1,6 +1,8 @@
 // External imports
+use anyhow::Result;
 use json::JsonValue;
 use std::collections::HashMap;
+
 // Imports from parent
 use super::{DatafileError, Rollout};
 
@@ -19,7 +21,7 @@ impl FeatureFlag {
     pub fn build(
         value: &mut JsonValue,
         rollout_map: &mut HashMap<String, Rollout>,
-    ) -> Result<FeatureFlag, DatafileError> {
+    ) -> Result<FeatureFlag> {
         let id = string_field!(value, "id")?;
         let key = string_field!(value, "key")?;
         let rollout_id = string_field!(value, "rolloutId")?;

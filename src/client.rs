@@ -1,12 +1,17 @@
 //! Everything related to make web requests to Optimizely
 
 // External imports
-use std::error::Error;
+use anyhow::Result;
 use std::rc::Rc;
 
 // Imports from parent
 use super::datafile::{Datafile, FeatureFlag};
 use super::user_context::UserContext;
+
+// Relative imports of sub modules
+pub use error::ClientError;
+
+mod error;
 
 #[derive(Debug)]
 pub struct Client {
@@ -14,9 +19,27 @@ pub struct Client {
 }
 
 impl Client {
-    pub fn build(datafile: &str) -> Result<Client, Box<dyn Error>> {
+    pub fn build_from_sdk_key(sdk_key: &str) -> Result<Client> {
+        // Construct URL
+        let url = format!("https://cdn.optimizely.com/datafiles/{}.json", sdk_key);
+
+        // Make GET request
+        // TODO: implement polling mechanism
+        let response = reqwest::blocking::get(url).or_else(|_| Err(ClientError::FailedRequest))?;
+
+        // Get response body
+        let datafile = response
+            .text()
+            .or_else(|_| Err(ClientError::FailedResponse))?;
+
+        // Use response to build Client
+        Client::build_from_string(&datafile)
+    }
+
+    pub fn build_from_string(datafile: &str) -> Result<Client> {
         // Build datafile object from string
         let datafile = Datafile::build(datafile)?;
+
         // Create counted reference
         let datafile = Rc::new(datafile);
 

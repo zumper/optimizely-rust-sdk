@@ -6,6 +6,11 @@ use optimizely::client::Client;
 use optimizely::user_attributes;
 use optimizely::user_context::UserAttributes;
 
+// SDK key for the development environment of mark.biesheuvel@optimizely.com
+// This key only grants read access to a JSON file and does not grant any further permissions
+const SDK_KEY: &str = "KVpGWnzPGKvvQ8yeEWmJZ";
+
+// This is a bundled copy of the JSON file that can be downloaded with the SDK key
 const FILE_PATH: &str = "examples/datafile.json";
 
 fn client() -> Client {
@@ -17,18 +22,25 @@ fn client() -> Client {
         .expect("should be able to read to string");
 
     // Example datafile is valid
-    Client::build(&datafile).expect("should be a valid datafile")
+    Client::build_from_string(&datafile).expect("should be a valid datafile")
 }
 
 #[test]
 fn empty_datafile() {
     // Empty datafile is invalid
-    let result = Client::build(r"");
+    let result = Client::build_from_string(r"");
     matches!(result, Err(_));
 }
 
 #[test]
-fn client_initialization() {
+fn client_init_with_sdk_key() {
+    let client = Client::build_from_sdk_key(SDK_KEY).expect("sdk ket should work");
+
+    dbg!(client);
+}
+
+#[test]
+fn client_init_with_fixed_datafile() {
     let client = client();
 
     // Check property on client

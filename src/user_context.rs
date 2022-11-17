@@ -59,7 +59,7 @@ impl UserContext {
             None => {
                 // When flag key cannot be found, return the off variation
                 // CONSIDERATION: Could have used Result<Decision, E> but this is how other Optimizely SDKs work
-                return Decision::off(flag_key)
+                return Decision::off(flag_key);
             }
         };
 

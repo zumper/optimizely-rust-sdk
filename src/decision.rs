@@ -16,7 +16,6 @@ pub struct Decision<'a> {
 }
 
 impl Decision<'_> {
-
     pub fn off<'a>(flag_key: &'a str) -> Decision {
         Decision {
             flag_key,

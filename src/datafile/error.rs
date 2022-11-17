@@ -1,28 +1,12 @@
 // External imports
-use std::error::Error;
-use std::fmt::{Display, Formatter, Result};
+use thiserror::Error;
 
-#[derive(Debug, PartialEq)]
+#[derive(Error, Debug, PartialEq)]
 pub enum DatafileError {
+    #[error("Missing field in datafile: {0:?}")]
     MissingField(String),
+    #[error("Revision is not parsable as integer")]
     InvalidRevision,
+    #[error("Rollout ID does not exist: {0:?}")]
     InvalidRolloutId(String),
 }
-
-impl Display for DatafileError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        match self {
-            DatafileError::MissingField(field) => {
-                write!(f, "Missing field in datafile: {:?}", field)
-            }
-            DatafileError::InvalidRevision => {
-                write!(f, "Revision is not parsable as integer")
-            }
-            DatafileError::InvalidRolloutId(id) => {
-                write!(f, "Rollout ID does not exist: {:?}", id)
-            }
-        }
-    }
-}
-
-impl Error for DatafileError {}

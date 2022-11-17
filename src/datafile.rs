@@ -1,15 +1,17 @@
 //! Everything related to parsing the Optimizely datafile
 
 // External imports
+use anyhow::Result;
 use std::collections::HashMap;
-use std::error::Error;
 
 // Relative imports of sub modules
 pub use error::DatafileError;
+pub use experiment::Experiment;
 pub use feature_flag::FeatureFlag;
 pub use rollout::Rollout;
 
 mod error;
+mod experiment;
 mod feature_flag;
 mod rollout;
 
@@ -21,7 +23,7 @@ pub struct Datafile {
 }
 
 impl Datafile {
-    pub fn build(datafile: &str) -> Result<Datafile, Box<dyn Error>> {
+    pub fn build(datafile: &str) -> Result<Datafile> {
         // Parse datafile as JSON
         let mut datafile = json::parse(datafile)?;
 
