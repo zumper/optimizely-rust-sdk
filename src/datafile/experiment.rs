@@ -1,6 +1,6 @@
 // External imports
-use json::JsonValue;
 use anyhow::Result;
+use json::JsonValue;
 
 // Imports from parent
 use super::DatafileError;

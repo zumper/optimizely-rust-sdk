@@ -25,11 +25,11 @@ impl Client {
 
         // Make GET request
         // TODO: implement polling mechanism
-        let response = reqwest::blocking::get(url).or_else(|_| Err(ClientError::FailedRequest))?;
+        let response = ureq::get(&url).call().or_else(|_| Err(ClientError::FailedRequest))?;
 
         // Get response body
         let datafile = response
-            .text()
+            .into_string()
             .or_else(|_| Err(ClientError::FailedResponse))?;
 
         // Use response to build Client

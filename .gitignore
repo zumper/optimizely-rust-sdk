@@ -1,2 +1,5 @@
 /target
 /Cargo.lock
+
+# Local file used for trying out new things
+playground.rs
