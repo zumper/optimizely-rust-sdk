@@ -12,13 +12,16 @@ pub struct Rollout {
 }
 
 impl Rollout {
-    pub fn build(value: &mut JsonValue) -> Result<Rollout> {
-        let id = string_field!(value, "id")?;
+    pub fn build(datafile: &mut JsonValue) -> Result<Rollout> {
+        let id = string_field!(datafile, "id")?;
 
-        let experiment_closure = |value| Experiment::build(value);
-        let experiments = list_field!(value, "experiments", experiment_closure)?;
+        let experiments = list_field!(datafile, "experiments", Experiment::build)?;
 
         let rollout = Rollout { id, experiments };
         Ok(rollout)
+    }
+
+    pub fn map_entry(self) -> (String, Rollout) {
+        (self.id.clone(), self)
     }
 }

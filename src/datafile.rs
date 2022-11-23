@@ -9,11 +9,15 @@ pub use error::DatafileError;
 pub use experiment::Experiment;
 pub use feature_flag::FeatureFlag;
 pub use rollout::Rollout;
+pub use traffic_allocation::TrafficAllocation;
+pub use variation::Variation;
 
 mod error;
 mod experiment;
 mod feature_flag;
 mod rollout;
+mod traffic_allocation;
+mod variation;
 
 #[derive(Debug)]
 pub struct Datafile {
@@ -35,24 +39,21 @@ impl Datafile {
             .parse::<u32>()
             .map_err(|_| DatafileError::InvalidRevision)?;
 
-        // Get list of rollouts
-        let rollout_closure = |value| Rollout::build(value);
-        let rollout_vector = list_field!(datafile, "rollouts", rollout_closure)?;
+        // Get map of rollouts
+        let rollouts: Vec<Rollout> = list_field!(datafile, "rollouts", Rollout::build)?;
+        let mut rollouts: HashMap<String, Rollout> = list_to_map!(rollouts, Rollout::map_entry);
 
-        // Convert list to hashmap of rollouts, to make it easier to look up
-        let mut rollout_map: HashMap<String, Rollout> = rollout_vector
-            .into_iter()
-            .map(|rollout| (rollout.id.clone(), rollout))
-            .collect();
+        // Get map of experiments
+        let experiments: Vec<Experiment> = list_field!(datafile, "experiments", Experiment::build)?;
+        let mut experiments: HashMap<String, Experiment> =
+            list_to_map!(experiments, Experiment::map_entry);
 
-        // Get list of feature flags
-        let flag_closure = |value| FeatureFlag::build(value, &mut rollout_map);
-        let flag_vector = list_field!(datafile, "featureFlags", flag_closure)?;
-
-        let feature_flags: HashMap<String, FeatureFlag> = flag_vector
-            .into_iter()
-            .map(|flag| (flag.key.clone(), flag))
-            .collect();
+        // Get map of feature flags
+        let build_flag_closure = |value| FeatureFlag::build(value, &mut rollouts, &mut experiments);
+        let feature_flags: Vec<FeatureFlag> =
+            list_field!(datafile, "featureFlags", build_flag_closure)?;
+        let feature_flags: HashMap<String, FeatureFlag> =
+            list_to_map!(feature_flags, FeatureFlag::map_entry);
 
         Ok(Datafile {
             account_id,

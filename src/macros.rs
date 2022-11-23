@@ -13,6 +13,15 @@ macro_rules! user_attributes {
     };
 }
 
+macro_rules! bool_field {
+    ($value: ident, $name: expr) => {
+        $value[$name]
+            .take()
+            .as_bool()
+            .ok_or(DatafileError::MissingField(String::from($name)))
+    };
+}
+
 macro_rules! string_field {
     ($value: ident, $name: expr) => {
         $value[$name]
@@ -28,5 +37,11 @@ macro_rules! list_field {
             .members_mut()
             .map($closure)
             .collect::<Result<Vec<_>, _>>()
+    };
+}
+
+macro_rules! list_to_map {
+    ($list: ident, $closure: expr) => {
+        $list.into_iter().map($closure).collect()
     };
 }

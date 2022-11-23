@@ -2,7 +2,7 @@
 use optimizely::client::Client;
 
 // Relative imports of sub modules
-use common::{SDK_KEY, FILE_PATH, ACCOUNT_ID, REVISION};
+use common::{ACCOUNT_ID, FILE_PATH, REVISION, SDK_KEY};
 mod common;
 
 #[test]
@@ -35,7 +35,6 @@ fn with_fixed_datafile() {
     matches!(result, Ok(_));
 
     if let Ok(client) = result {
-
         // Check property on client
         assert_eq!(client.account_id(), ACCOUNT_ID);
         assert_eq!(client.revision(), REVISION);
