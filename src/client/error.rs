@@ -7,4 +7,8 @@ pub enum ClientError {
     FailedRequest,
     #[error("Failed to decode response from cdn.optimizely.com")]
     FailedResponse,
+    #[error("Failed to open local datafile")]
+    FailedFileOpen,
+    #[error("Failed to read from local datafile")]
+    FailedFileRead,
 }

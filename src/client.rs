@@ -2,6 +2,8 @@
 
 // External imports
 use anyhow::Result;
+use std::fs::File;
+use std::io::Read;
 use std::rc::Rc;
 
 // Imports from parent
@@ -25,7 +27,9 @@ impl Client {
 
         // Make GET request
         // TODO: implement polling mechanism
-        let response = ureq::get(&url).call().or_else(|_| Err(ClientError::FailedRequest))?;
+        let response = ureq::get(&url)
+            .call()
+            .or_else(|_| Err(ClientError::FailedRequest))?;
 
         // Get response body
         let datafile = response
@@ -33,6 +37,21 @@ impl Client {
             .or_else(|_| Err(ClientError::FailedResponse))?;
 
         // Use response to build Client
+        Client::build_from_string(&datafile)
+    }
+
+    pub fn build_from_file(file_path: &str) -> Result<Client> {
+        // Read datafile from local path
+        let mut datafile = String::new();
+
+        // Open file
+        let mut file = File::open(file_path).or_else(|_| Err(ClientError::FailedFileOpen))?;
+
+        // Read file content into String
+        file.read_to_string(&mut datafile)
+            .or_else(|_| Err(ClientError::FailedFileRead))?;
+
+        // Use file content to build Client
         Client::build_from_string(&datafile)
     }
 
