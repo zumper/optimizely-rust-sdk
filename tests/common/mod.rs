@@ -3,6 +3,7 @@
 
 // Imports from this crate
 use optimizely::client::Client;
+use optimizely::decision::Decision;
 
 // This is the account ID of mark.biesheuvel@optimizely.com
 pub const ACCOUNT_ID: &str = "21537940595";
@@ -18,6 +19,14 @@ pub const FILE_PATH: &str = "examples/datafile.json";
 pub const REVISION: u32 = 73;
 
 // Helper function create a fixed client
-pub fn client() -> Client {
+pub fn get_client() -> Client {
     Client::build_from_file(FILE_PATH).expect("local file should work")
+}
+
+pub fn get_decision<'a, 'b>(user_id: &'b str, flag_key: &'a str) -> Decision<'a> {
+    let client = get_client();
+    let user_context = client.create_user_context(user_id);
+
+    let decide_options = Vec::new();
+    user_context.decide(flag_key, &decide_options)
 }

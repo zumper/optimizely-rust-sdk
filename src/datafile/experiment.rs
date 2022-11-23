@@ -24,6 +24,8 @@ impl Experiment {
         let variations: Vec<Variation> = list_field!(datafile, "variations", Variation::build)?;
         let variations: HashMap<String, Variation> = list_to_map!(variations, Variation::map_entry);
 
+        // TODO: create traffic allocation
+
         let experiment = Experiment {
             id,
             key,

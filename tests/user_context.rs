@@ -3,12 +3,12 @@ use optimizely::user_attributes;
 use optimizely::user_context::UserAttributes;
 
 // Relative imports of sub modules
-use common::client;
+use common::get_client;
 mod common;
 
 #[test]
 fn user_context_attributes() {
-    let client = client();
+    let client = get_client();
     let mut user_context = client.create_user_context("user123");
 
     user_context.set_attribute("is_employee", "true");

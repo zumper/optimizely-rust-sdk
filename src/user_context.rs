@@ -52,7 +52,11 @@ impl UserContext {
         &self.attributes
     }
 
-    pub fn decide<'a>(&'a self, flag_key: &'a str, _options: &Vec<DecideOption>) -> Decision {
+    pub fn decide<'a, 'b>(
+        &'b self,
+        flag_key: &'a str,
+        _options: &Vec<DecideOption>,
+    ) -> Decision<'a> {
         // Retrieve Flag object
         let flag = match self.datafile.get_flag(flag_key) {
             Some(flag) => flag,
