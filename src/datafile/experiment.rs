@@ -4,7 +4,7 @@ use json::JsonValue;
 use std::collections::HashMap;
 
 // Imports from parent
-use super::{DatafileError, Variation};
+use super::{TrafficAllocation, Variation};
 
 /// Optimizely experiment
 #[derive(Debug)]
@@ -12,25 +12,29 @@ pub struct Experiment {
     pub id: String,
     pub key: String,
     pub status: String,
-    pub variations: HashMap<String, Variation>,
+    pub traffic_allocation: TrafficAllocation,
 }
 
 impl Experiment {
     pub fn build(datafile: &mut JsonValue) -> Result<Experiment> {
+        // Get fields as string
         let id = string_field!(datafile, "id")?;
         let key = string_field!(datafile, "key")?;
         let status = string_field!(datafile, "status")?;
 
+        // Create map of all variation so they can be looked up within TrafficAllocation
         let variations: Vec<Variation> = list_field!(datafile, "variations", Variation::build)?;
-        let variations: HashMap<String, Variation> = list_to_map!(variations, Variation::map_entry);
+        let mut variations: HashMap<String, Variation> = list_to_map!(variations, Variation::map_entry);
 
-        // TODO: create traffic allocation
+        // Build TrafficAllocation struct
+        let traffic_allocation = TrafficAllocation::build(datafile, &mut variations)?;
 
+        // Initialize struct and return result
         let experiment = Experiment {
             id,
             key,
             status,
-            variations,
+            traffic_allocation,
         };
         Ok(experiment)
     }

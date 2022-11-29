@@ -11,4 +11,6 @@ pub enum DatafileError {
     InvalidRolloutId(String),
     #[error("Experiment ID does not exist: {0:?}")]
     InvalidExperimentId(String),
+    #[error("Variation ID does not exist: {0:?}")]
+    InvalidVariationId(String),
 }

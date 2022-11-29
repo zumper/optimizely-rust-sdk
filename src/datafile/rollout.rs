@@ -3,7 +3,7 @@ use anyhow::Result;
 use json::JsonValue;
 
 // Imports from parent
-use super::{DatafileError, Experiment};
+use super::Experiment;
 
 #[derive(Debug)]
 pub struct Rollout {

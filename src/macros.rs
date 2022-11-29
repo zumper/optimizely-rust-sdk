@@ -2,7 +2,7 @@
 macro_rules! user_attributes {
     { $( $key: expr => $value: expr),* $(,)?} => {
         {
-            let mut attribute = UserAttributes::new();
+            let mut attribute = optimizely::user_context::UserAttributes::new();
 
             $(
                 attribute.insert($key.to_owned(), $value.to_owned());
@@ -18,7 +18,20 @@ macro_rules! bool_field {
         $value[$name]
             .take()
             .as_bool()
-            .ok_or(DatafileError::MissingField(String::from($name)))
+            .ok_or(crate::datafile::DatafileError::MissingField(String::from(
+                $name,
+            )))
+    };
+}
+
+macro_rules! u32_field {
+    ($value: ident, $name: expr) => {
+        $value[$name]
+            .take()
+            .as_u32()
+            .ok_or(crate::datafile::DatafileError::MissingField(String::from(
+                $name,
+            )))
     };
 }
 
@@ -26,7 +39,9 @@ macro_rules! string_field {
     ($value: ident, $name: expr) => {
         $value[$name]
             .take_string()
-            .ok_or(DatafileError::MissingField(String::from($name)))
+            .ok_or(crate::datafile::DatafileError::MissingField(String::from(
+                $name,
+            )))
     };
 }
 
@@ -36,7 +51,7 @@ macro_rules! list_field {
             .take()
             .members_mut()
             .map($closure)
-            .collect::<Result<Vec<_>, _>>()
+            .collect::<anyhow::Result<Vec<_>>>()
     };
 }
 

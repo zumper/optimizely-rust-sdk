@@ -2,9 +2,6 @@
 use anyhow::Result;
 use json::JsonValue;
 
-// Imports from parent
-use super::DatafileError;
-
 #[derive(Debug)]
 pub struct Variation {
     pub id: String,

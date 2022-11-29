@@ -34,7 +34,7 @@ impl Datafile {
         // Get account id as string
         let account_id = string_field!(datafile, "accountId")?;
 
-        // Get account id as string
+        // Get revision as a string and parse to integer
         let revision = string_field!(datafile, "revision")?
             .parse::<u32>()
             .map_err(|_| DatafileError::InvalidRevision)?;
