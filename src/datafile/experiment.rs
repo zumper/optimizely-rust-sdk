@@ -2,6 +2,7 @@
 use anyhow::Result;
 use json::JsonValue;
 use std::collections::HashMap;
+use std::rc::Rc;
 
 // Imports from parent
 use super::{TrafficAllocation, Variation};
@@ -24,7 +25,7 @@ impl Experiment {
 
         // Create map of all variation so they can be looked up within TrafficAllocation
         let variations: Vec<Variation> = list_field!(datafile, "variations", Variation::build)?;
-        let mut variations: HashMap<String, Variation> = list_to_map!(variations, Variation::map_entry);
+        let mut variations: HashMap<String, Rc<Variation>> = list_to_map!(variations, Variation::map_entry);
 
         // Build TrafficAllocation struct
         let traffic_allocation = TrafficAllocation::build(datafile, &mut variations)?;

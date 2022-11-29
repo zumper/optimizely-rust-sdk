@@ -1,6 +1,7 @@
 // External imports
 use anyhow::Result;
 use json::JsonValue;
+use std::rc::Rc;
 
 #[derive(Debug)]
 pub struct Variation {
@@ -23,7 +24,7 @@ impl Variation {
         Ok(variation)
     }
 
-    pub fn map_entry(self) -> (String, Variation) {
-        (self.id.clone(), self)
+    pub fn map_entry(self) -> (String, Rc<Variation>) {
+        (self.id.clone(), Rc::new(self))
     }
 }

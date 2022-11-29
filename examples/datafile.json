@@ -125,7 +125,7 @@
                 "variables": [
                   {
                     "id": "8291",
-                    "value": "asc"
+                    "value": "desc"
                   },
                   {
                     "id": "8290",
@@ -133,12 +133,12 @@
                   },
                   {
                     "id": "8289",
-                    "value": "3"
+                    "value": "4"
                   }
                 ],
-                "id": "44475",
-                "key": "off",
-                "featureEnabled": false
+                "id": "44477",
+                "key": "variation_1",
+                "featureEnabled": true
               }
             ],
             "forcedVariations": {},
@@ -146,7 +146,7 @@
             "layerId": "rollout-15415-21533480907",
             "trafficAllocation": [
               {
-                "entityId": "44475",
+                "entityId": "44477",
                 "endOfRange": 10000
               }
             ],
@@ -563,10 +563,6 @@
         "trafficAllocation": [
           {
             "entityId": "58160",
-            "endOfRange": 4900
-          },
-          {
-            "entityId": "58161",
             "endOfRange": 5000
           },
           {
