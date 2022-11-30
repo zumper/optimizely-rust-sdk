@@ -9,7 +9,7 @@ pub struct Decision<'a> {
     flag_key: &'a str,
     enabled: bool,
     // rule_key
-    variation_key: &'a str,
+    variation_key: String,
     // variables
     // user_context
     // reasons
@@ -20,11 +20,11 @@ impl Decision<'_> {
         Decision {
             flag_key,
             enabled: false,
-            variation_key: &"off",
+            variation_key: String::from("off"),
         }
     }
 
-    pub fn new<'a>(flag_key: &'a str, enabled: bool, variation_key: &'a str) -> Decision {
+    pub fn new<'a>(flag_key: &'a str, enabled: bool, variation_key: String) -> Decision {
         Decision {
             flag_key,
             enabled,

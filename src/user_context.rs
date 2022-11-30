@@ -1,15 +1,19 @@
 // External imports
+use fasthash::murmur3::hash32_with_seed as murmur3_hash;
 use std::collections::HashMap;
 use std::rc::Rc;
 
 // Imports from parent
-use super::datafile::Datafile;
+use super::datafile::{Datafile, Experiment, Variation};
 use super::decision::{DecideOption, Decision};
 
 // Custom type alias
 pub type UserAttributes = HashMap<String, String>;
 
-// Inspiration: https://docs.developers.optimizely.com/experimentation/v4.0.0-full-stack/docs/optimizelyusercontext-python
+// Constant used for the hashing algorithm
+const HASH_SEED: u32 = 1;
+// Ranges are specified between 0 and 10_000
+const MAX_OF_RANGE: f64 = 10_000 as f64;
 
 #[derive(Debug)]
 pub struct UserContext {
@@ -53,10 +57,10 @@ impl UserContext {
     }
 
     pub fn decide<'a, 'b>(
-        &'b self,
-        flag_key: &'a str,
+        &'a self,
+        flag_key: &'b str,
         _options: &Vec<DecideOption>,
-    ) -> Decision<'a> {
+    ) -> Decision<'b> {
         // Retrieve Flag object
         let flag = match self.datafile.get_flag(flag_key) {
             Some(flag) => flag,
@@ -67,12 +71,43 @@ impl UserContext {
             }
         };
 
-        // TODO: use Flag object
-        drop(flag);
+        // TODO: find first Experiment for which this user qualifies
 
-        match self.user_id.as_ref() {
-            "user1" => Decision::new(flag_key, false, "off"),
-            _ => Decision::new(flag_key, true, "on"),
+        // Find the first Rollout for which this user qualifies
+        let result = flag
+            .rollout
+            .experiments
+            .iter()
+            .find_map(|experiment| self.decide_for_experiment(experiment));
+
+        match result {
+            None => Decision::off(flag_key),
+            Some(variation) => Decision::new(
+                flag_key,
+                variation.is_feature_enabled,
+                variation.key.to_owned(),
+            ),
         }
+    }
+
+    fn decide_for_experiment<'a>(&'a self, experiment: &'a Experiment) -> Option<Rc<Variation>> {
+        // Use references for the ids
+        let user_id = &self.user_id;
+        let experiment_id = &experiment.id;
+
+        // Concatenate user id and experiment id
+        let bucketing_key = format!("{user_id}{experiment_id}");
+
+        // To hash the bucket key it needs to be converted to an array of `u8` bytes
+        // Use Murmur3 (32-bit) with seed
+        let hash_value = murmur3_hash(bucketing_key.as_bytes(), HASH_SEED);
+
+        // Bring the hash into a range of 0 to 10_000
+        let bucket_value = ((hash_value as f64) / (u32::MAX as f64) * MAX_OF_RANGE) as u32;
+
+        // Get the variation according to the traffic allocation
+        experiment
+            .traffic_allocation
+            .get_variation_for_bucket(bucket_value)
     }
 }
