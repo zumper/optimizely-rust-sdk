@@ -71,22 +71,46 @@ impl UserContext {
             }
         };
 
-        // TODO: find first Experiment for which this user qualifies
-
-        // Find the first Rollout for which this user qualifies
+        // Find first Experiment for which this user qualifies
         let result = flag
-            .rollout
             .experiments
             .iter()
             .find_map(|experiment| self.decide_for_experiment(experiment));
 
         match result {
-            None => Decision::off(flag_key),
-            Some(variation) => Decision::new(
-                flag_key,
-                variation.is_feature_enabled,
-                variation.key.to_owned(),
-            ),
+            Some(variation) => {
+                // Unpack the variation and create Decision struct
+                Decision::new(
+                    flag_key,
+                    variation.is_feature_enabled,
+                    variation.key.to_owned(),
+                )
+            }
+            None => {
+                // No direct experiment found, let's look at the Rollout
+
+                // Find the first experiment within the Rollout for which this user qualifies
+                let result = flag
+                    .rollout
+                    .experiments
+                    .iter()
+                    .find_map(|experiment| self.decide_for_experiment(experiment));
+
+                match result {
+                    Some(variation) => {
+                        // Unpack the variation and create Decision struct
+                        Decision::new(
+                            flag_key,
+                            variation.is_feature_enabled,
+                            variation.key.to_owned(),
+                        )
+                    }
+                    None => {
+                        // No experiment or rollout found, or user does not qualify for any
+                        Decision::off(flag_key)
+                    }
+                }
+            }
         }
     }
 
