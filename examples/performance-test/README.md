@@ -4,15 +4,7 @@
 A performance test to compare the SDK of different languages.
 Each script will generate one million decisions for the flag `buy_button` from the example datafile.
 The user IDs will start with the phrase "user" followed by a number from 0 to 999,999.
-
-## Results
-
-| Language   | Duration |
-| :--------- | -------: |
-| Rust       |    0.17s |
-| Go         |    2.80s |
-| JavaScript |    3.18s |
-| Python     |   22.57s |
+Note that the times also include reading the datafile from disk and initializing the SDK. However, this should only be a fraction of the total time for one million decisions.
 
 ## Instructions
 
@@ -41,3 +33,7 @@ time node src/main.js
 go build -o bin/main src/main.go
 time bin/main
 ```
+
+## Results
+
+See [home page](/../../)
