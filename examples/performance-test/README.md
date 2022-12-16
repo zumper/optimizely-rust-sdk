@@ -10,6 +10,7 @@ The user IDs will start with the phrase "user" followed by a number from 0 to 99
 | Language   | Duration |
 | :--------- | -------: |
 | Rust       |    0.17s |
+| Go         |    2.80s |
 | JavaScript |    3.18s |
 | Python     |   22.57s |
 
@@ -25,12 +26,18 @@ time target/release/performance-test
 
 ### Python
 ```sh
-pip install optimizely-sdk
+pip install -r requirements.txt
 time python src/main.py
 ```
 
 ### JavaScript
 ```sh
-npm install @optimizely/optimizely-sdk
+npm install
 time node src/main.js
+```
+
+### Go
+```sh
+go build -o bin/main src/main.go
+time bin/main
 ```

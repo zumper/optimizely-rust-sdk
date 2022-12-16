@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@optimizely/optimizely-sdk": "^4.9.2"
+  }
+}
