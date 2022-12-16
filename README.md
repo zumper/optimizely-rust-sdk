@@ -14,7 +14,6 @@ This SDK supports only a small subset of features.
 - [ ] Logger
 - [ ] Notification listeners
 - [ ] Decide Options
-- [ ] Neptune
 - [X] Creating an user context
 - [X] Decide method consistent with other SDKs
 - [ ] Evaluating audience conditions
