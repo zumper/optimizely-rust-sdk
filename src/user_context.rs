@@ -61,7 +61,7 @@ impl UserContext {
     pub fn decide<'a, 'b>(
         &'a self,
         flag_key: &'b str,
-        _options: &Vec<DecideOption>,
+        options: &Vec<DecideOption>,
     ) -> Decision<'b> {
         // Retrieve Flag object
         let flag = match self.datafile.get_flag(flag_key) {
@@ -73,8 +73,13 @@ impl UserContext {
             }
         };
 
+        // Only send decision events if the DisableDecisionEvent option is not included
+        let send_decision_event = !options
+            .iter()
+            .any(|option| *option == DecideOption::DisableDecisionEvent);
+
         // Get the selected variation for the given flag
-        match self.get_variation_for_flag(flag) {
+        match self.get_variation_for_flag(flag, send_decision_event) {
             Some(variation) => {
                 // Unpack the variation and create Decision struct
                 Decision::new(
@@ -90,14 +95,17 @@ impl UserContext {
         }
     }
 
-    fn get_variation_for_flag(&self, flag: &FeatureFlag) -> Option<Rc<Variation>> {
+    fn get_variation_for_flag(
+        &self,
+        flag: &FeatureFlag,
+        send_decision_event: bool,
+    ) -> Option<Rc<Variation>> {
         // TODO: don't send decision if DecideOption.DisableDecisionEvent is set
 
         // Find first Experiment for which this user qualifies
-        let result = flag
-            .experiments
-            .iter()
-            .find_map(|experiment| self.get_variation_for_experiment(experiment, true));
+        let result = flag.experiments.iter().find_map(|experiment| {
+            self.get_variation_for_experiment(experiment, send_decision_event)
+        });
 
         match result {
             Some(_) => {

@@ -3,7 +3,7 @@
 
 // Imports from this crate
 use optimizely::client::Client;
-use optimizely::decision::Decision;
+use optimizely::decision::{DecideOption, Decision};
 
 // This is the account ID of mark.biesheuvel@optimizely.com
 pub const ACCOUNT_ID: &str = "21537940595";
@@ -27,6 +27,9 @@ pub fn get_decision<'a, 'b>(user_id: &'b str, flag_key: &'a str) -> Decision<'a>
     let client = get_client();
     let user_context = client.create_user_context(user_id);
 
-    let decide_options = Vec::new();
+    // Do not send any decision events during testing
+    let decide_options = vec![DecideOption::DisableDecisionEvent];
+
+    // Return decision result
     user_context.decide(flag_key, &decide_options)
 }

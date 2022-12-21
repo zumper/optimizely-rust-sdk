@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum DecideOption {
     // Prevents the visitor from firing an impression while still being served the variation,
     // which disables displaying results of the Decide method on the Optimizely application's Results page.

@@ -18,7 +18,8 @@ A list of the features that are currently included:
 - [ ] Event dispatcher (batched)
 - [ ] Logger
 - [ ] Notification listeners
-- [ ] Decide Options
+- [X] Decide option (DisableDecisionEvent)
+- [ ] Decide options (others)
 - [X] Creating an user context
 - [X] Decide method consistent with other SDKs
 - [ ] Evaluating audience conditions
