@@ -58,11 +58,7 @@ impl UserContext {
         &self.attributes
     }
 
-    pub fn decide<'a, 'b>(
-        &'a self,
-        flag_key: &'b str,
-        options: &Vec<DecideOption>,
-    ) -> Decision<'b> {
+    pub fn decide<'a, 'b>(&'a self, flag_key: &'b str, options: &Vec<DecideOption>) -> Decision<'b> {
         // Retrieve Flag object
         let flag = match self.datafile.get_flag(flag_key) {
             Some(flag) => flag,
@@ -74,19 +70,15 @@ impl UserContext {
         };
 
         // Only send decision events if the DisableDecisionEvent option is not included
-        let send_decision_event = !options
+        let send_decision = !options
             .iter()
             .any(|option| *option == DecideOption::DisableDecisionEvent);
 
         // Get the selected variation for the given flag
-        match self.get_variation_for_flag(flag, send_decision_event) {
+        match self.get_variation_for_flag(flag, send_decision) {
             Some(variation) => {
                 // Unpack the variation and create Decision struct
-                Decision::new(
-                    flag_key,
-                    variation.is_feature_enabled,
-                    variation.key.to_owned(),
-                )
+                Decision::new(flag_key, variation.is_feature_enabled, variation.key.to_owned())
             }
             None => {
                 // No experiment or rollout found, or user does not qualify for any
@@ -95,17 +87,14 @@ impl UserContext {
         }
     }
 
-    fn get_variation_for_flag(
-        &self,
-        flag: &FeatureFlag,
-        send_decision_event: bool,
-    ) -> Option<Rc<Variation>> {
+    fn get_variation_for_flag(&self, flag: &FeatureFlag, send_decision: bool) -> Option<Rc<Variation>> {
         // TODO: don't send decision if DecideOption.DisableDecisionEvent is set
 
         // Find first Experiment for which this user qualifies
-        let result = flag.experiments.iter().find_map(|experiment| {
-            self.get_variation_for_experiment(experiment, send_decision_event)
-        });
+        let result = flag
+            .experiments
+            .iter()
+            .find_map(|experiment| self.get_variation_for_experiment(experiment, send_decision));
 
         match result {
             Some(_) => {
@@ -124,11 +113,7 @@ impl UserContext {
         }
     }
 
-    fn get_variation_for_experiment<'a>(
-        &'a self,
-        experiment: &'a Experiment,
-        send_decision_event: bool,
-    ) -> Option<Rc<Variation>> {
+    fn get_variation_for_experiment(&self, experiment: &Experiment, send_decision: bool) -> Option<Rc<Variation>> {
         // Use references for the ids
         let user_id = &self.user_id;
         let experiment_id = &experiment.id;
@@ -148,11 +133,10 @@ impl UserContext {
             .traffic_allocation
             .get_variation_for_bucket(bucket_value);
 
-        // Send out a decision event as a side effect
-
         match result {
             Some(variation) => {
-                if send_decision_event {
+                if send_decision {
+                    // Send out a decision event as a side effect
                     // Ignore result of the send_decision function
                     let _ = self.send_decision(experiment, Rc::clone(&variation));
                 }

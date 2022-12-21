@@ -45,15 +45,12 @@ impl Datafile {
 
         // Get map of experiments
         let experiments: Vec<Experiment> = list_field!(datafile, "experiments", Experiment::build)?;
-        let mut experiments: HashMap<String, Experiment> =
-            list_to_map!(experiments, Experiment::map_entry);
+        let mut experiments: HashMap<String, Experiment> = list_to_map!(experiments, Experiment::map_entry);
 
         // Get map of feature flags
         let build_flag_closure = |value| FeatureFlag::build(value, &mut rollouts, &mut experiments);
-        let feature_flags: Vec<FeatureFlag> =
-            list_field!(datafile, "featureFlags", build_flag_closure)?;
-        let feature_flags: HashMap<String, FeatureFlag> =
-            list_to_map!(feature_flags, FeatureFlag::map_entry);
+        let feature_flags: Vec<FeatureFlag> = list_field!(datafile, "featureFlags", build_flag_closure)?;
+        let feature_flags: HashMap<String, FeatureFlag> = list_to_map!(feature_flags, FeatureFlag::map_entry);
 
         Ok(Datafile {
             account_id,

@@ -39,8 +39,7 @@ impl TrafficAllocation {
         };
 
         // Create a binary tree for efficient look ups
-        let ranges: Vec<(u32, Rc<Variation>)> =
-            list_field!(datafile, "trafficAllocation", get_allocation)?;
+        let ranges: Vec<(u32, Rc<Variation>)> = list_field!(datafile, "trafficAllocation", get_allocation)?;
         let ranges: BTreeMap<u32, Rc<Variation>> = ranges.into_iter().collect();
 
         // Initialize struct and return result

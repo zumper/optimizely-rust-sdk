@@ -18,9 +18,7 @@ macro_rules! bool_field {
         $value[$name]
             .take()
             .as_bool()
-            .ok_or(crate::datafile::DatafileError::MissingField(String::from(
-                $name,
-            )))
+            .ok_or(crate::datafile::DatafileError::MissingField(String::from($name)))
     };
 }
 
@@ -29,9 +27,7 @@ macro_rules! u32_field {
         $value[$name]
             .take()
             .as_u32()
-            .ok_or(crate::datafile::DatafileError::MissingField(String::from(
-                $name,
-            )))
+            .ok_or(crate::datafile::DatafileError::MissingField(String::from($name)))
     };
 }
 
@@ -39,9 +35,7 @@ macro_rules! string_field {
     ($value: ident, $name: expr) => {
         $value[$name]
             .take_string()
-            .ok_or(crate::datafile::DatafileError::MissingField(String::from(
-                $name,
-            )))
+            .ok_or(crate::datafile::DatafileError::MissingField(String::from($name)))
     };
 }
 
