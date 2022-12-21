@@ -12,6 +12,7 @@ use super::{TrafficAllocation, Variation};
 pub struct Experiment {
     pub id: String,
     pub key: String,
+    pub campaign_id: String,
     pub status: String,
     pub traffic_allocation: TrafficAllocation,
 }
@@ -21,6 +22,7 @@ impl Experiment {
         // Get fields as string
         let id = string_field!(datafile, "id")?;
         let key = string_field!(datafile, "key")?;
+        let campaign_id = string_field!(datafile, "layerId")?;
         let status = string_field!(datafile, "status")?;
 
         // Create map of all variation so they can be looked up within TrafficAllocation
@@ -35,6 +37,7 @@ impl Experiment {
         let experiment = Experiment {
             id,
             key,
+            campaign_id,
             status,
             traffic_allocation,
         };

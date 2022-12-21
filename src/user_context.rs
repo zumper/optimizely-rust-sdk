@@ -1,10 +1,12 @@
 // External imports
+use anyhow::Result;
 use fasthash::murmur3::hash32_with_seed as murmur3_hash;
 use std::collections::HashMap;
 use std::rc::Rc;
+use std::time::SystemTime;
 
 // Imports from parent
-use super::datafile::{Datafile, Experiment, Variation};
+use super::datafile::{Datafile, Experiment, FeatureFlag, Variation};
 use super::decision::{DecideOption, Decision};
 
 // Custom type alias
@@ -71,13 +73,8 @@ impl UserContext {
             }
         };
 
-        // Find first Experiment for which this user qualifies
-        let result = flag
-            .experiments
-            .iter()
-            .find_map(|experiment| self.decide_for_experiment(experiment));
-
-        match result {
+        // Get the selected variation for the given flag
+        match self.get_variation_for_flag(flag) {
             Some(variation) => {
                 // Unpack the variation and create Decision struct
                 Decision::new(
@@ -87,34 +84,43 @@ impl UserContext {
                 )
             }
             None => {
-                // No direct experiment found, let's look at the Rollout
-
-                // Find the first experiment within the Rollout for which this user qualifies
-                let result = flag
-                    .rollout
-                    .experiments
-                    .iter()
-                    .find_map(|experiment| self.decide_for_experiment(experiment));
-
-                match result {
-                    Some(variation) => {
-                        // Unpack the variation and create Decision struct
-                        Decision::new(
-                            flag_key,
-                            variation.is_feature_enabled,
-                            variation.key.to_owned(),
-                        )
-                    }
-                    None => {
-                        // No experiment or rollout found, or user does not qualify for any
-                        Decision::off(flag_key)
-                    }
-                }
+                // No experiment or rollout found, or user does not qualify for any
+                Decision::off(flag_key)
             }
         }
     }
 
-    fn decide_for_experiment<'a>(&'a self, experiment: &'a Experiment) -> Option<Rc<Variation>> {
+    fn get_variation_for_flag(&self, flag: &FeatureFlag) -> Option<Rc<Variation>> {
+        // TODO: don't send decision if DecideOption.DisableDecisionEvent is set
+
+        // Find first Experiment for which this user qualifies
+        let result = flag
+            .experiments
+            .iter()
+            .find_map(|experiment| self.get_variation_for_experiment(experiment, true));
+
+        match result {
+            Some(_) => {
+                // A matching A/B test was found, send out any decisions
+                result
+            }
+            None => {
+                // No direct experiment found, let's look at the Rollout
+
+                // Find the first experiment within the Rollout for which this user qualifies
+                flag.rollout
+                    .experiments
+                    .iter()
+                    .find_map(|experiment| self.get_variation_for_experiment(experiment, false))
+            }
+        }
+    }
+
+    fn get_variation_for_experiment<'a>(
+        &'a self,
+        experiment: &'a Experiment,
+        send_decision_event: bool,
+    ) -> Option<Rc<Variation>> {
         // Use references for the ids
         let user_id = &self.user_id;
         let experiment_id = &experiment.id;
@@ -130,8 +136,79 @@ impl UserContext {
         let bucket_value = ((hash_value as f64) / (u32::MAX as f64) * MAX_OF_RANGE) as u32;
 
         // Get the variation according to the traffic allocation
-        experiment
+        let result = experiment
             .traffic_allocation
-            .get_variation_for_bucket(bucket_value)
+            .get_variation_for_bucket(bucket_value);
+
+        // Send out a decision event as a side effect
+
+        match result {
+            Some(variation) => {
+                if send_decision_event {
+                    // Ignore result of the send_decision function
+                    let _ = self.send_decision(experiment, Rc::clone(&variation));
+                }
+                Some(variation)
+            }
+            None => None,
+        }
+    }
+
+    fn send_decision(&self, experiment: &Experiment, variation: Rc<Variation>) -> Result<()> {
+        // Get timestamp as milliseconds since the epoch
+        // NOTE: Convert to u64 as json::object does not support u128
+        let timestamp = SystemTime::now()
+            .duration_since(SystemTime::UNIX_EPOCH)?
+            .as_millis() as u64;
+
+        // Decision object
+        let decision = json::object! {
+            "campaign_id": experiment.campaign_id.to_owned(),
+            "experiment_id": experiment.id.to_owned(),
+            "variation_id": variation.id.to_owned(),
+            "is_campaign_holdback": false,
+        };
+
+        // Event object
+        let event = json::object! {
+            "entity_id": experiment.campaign_id.to_owned(),
+            "type": "campaign_activated",
+            "timestamp": timestamp,
+            "uuid": 1,
+        };
+
+        // Snapshot object
+        let snapshot = json::object! {
+            "decisions": [decision],
+            "events": [event],
+        };
+
+        // Visitor object
+        let visitor = json::object! {
+            "visitor_id": self.user_id.to_owned(),
+            "snapshots": [snapshot],
+        };
+
+        // TODO: queue these decisions and send in batches
+
+        // POST request payload
+        let payload = json::object! {
+            "account_id": self.datafile.account_id().to_owned(),
+            "visitors": [visitor],
+            "enrich_decisions": true,
+            "anonymize_ip": true,
+            "client_name": "rust-sdk",
+            "client_version": "0.0.1",
+        };
+
+        // Make POST request
+        let response = ureq::post("https://logx.optimizely.com/v1/events")
+            .set("content-type", "application/json")
+            .send_string(&payload.dump())?;
+
+        // Ignore response
+        drop(response);
+
+        Ok(())
     }
 }
