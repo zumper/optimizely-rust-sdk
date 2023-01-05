@@ -78,7 +78,7 @@ impl UserContext {
         match self.get_variation_for_flag(flag, send_decision) {
             Some(variation) => {
                 // Unpack the variation and create Decision struct
-                Decision::new(flag_key, variation.is_feature_enabled, variation.key.to_owned())
+                Decision::new(flag_key, variation.is_feature_enabled(), variation.key().to_owned())
             }
             None => {
                 // No experiment or rollout found, or user does not qualify for any
@@ -92,7 +92,7 @@ impl UserContext {
 
         // Find first Experiment for which this user qualifies
         let result = flag
-            .experiments
+            .experiments()
             .iter()
             .find_map(|experiment| self.get_variation_for_experiment(experiment, send_decision));
 
@@ -105,8 +105,8 @@ impl UserContext {
                 // No direct experiment found, let's look at the Rollout
 
                 // Find the first experiment within the Rollout for which this user qualifies
-                flag.rollout
-                    .experiments
+                flag.rollout()
+                    .experiments()
                     .iter()
                     .find_map(|experiment| self.get_variation_for_experiment(experiment, false))
             }
@@ -116,7 +116,7 @@ impl UserContext {
     fn get_variation_for_experiment(&self, experiment: &Experiment, send_decision: bool) -> Option<Rc<Variation>> {
         // Use references for the ids
         let user_id = &self.user_id;
-        let experiment_id = &experiment.id;
+        let experiment_id = &experiment.id();
 
         // Concatenate user id and experiment id
         let bucketing_key = format!("{user_id}{experiment_id}");
@@ -130,7 +130,7 @@ impl UserContext {
 
         // Get the variation according to the traffic allocation
         let result = experiment
-            .traffic_allocation
+            .traffic_allocation()
             .get_variation_for_bucket(bucket_value);
 
         match result {
@@ -155,15 +155,15 @@ impl UserContext {
 
         // Decision object
         let decision = json::object! {
-            "campaign_id": experiment.campaign_id.to_owned(),
-            "experiment_id": experiment.id.to_owned(),
-            "variation_id": variation.id.to_owned(),
+            "campaign_id": experiment.campaign_id().to_owned(),
+            "experiment_id": experiment.id().to_owned(),
+            "variation_id": variation.id().to_owned(),
             "is_campaign_holdback": false,
         };
 
         // Event object
         let event = json::object! {
-            "entity_id": experiment.campaign_id.to_owned(),
+            "entity_id": experiment.campaign_id().to_owned(),
             "type": "campaign_activated",
             "timestamp": timestamp,
             "uuid": 1,

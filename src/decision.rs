@@ -16,20 +16,16 @@ pub struct Decision<'a> {
 }
 
 impl Decision<'_> {
-    pub fn off<'a>(flag_key: &'a str) -> Decision {
-        Decision {
-            flag_key,
-            enabled: false,
-            variation_key: String::from("off"),
-        }
-    }
-
     pub fn new<'a>(flag_key: &'a str, enabled: bool, variation_key: String) -> Decision {
         Decision {
             flag_key,
             enabled,
             variation_key,
         }
+    }
+
+    pub fn off<'a>(flag_key: &'a str) -> Decision {
+        Decision::new(flag_key, false, String::from("off"))
     }
 
     pub fn flag_key(&self) -> &str {

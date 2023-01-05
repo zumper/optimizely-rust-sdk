@@ -5,9 +5,9 @@ use std::rc::Rc;
 
 #[derive(Debug)]
 pub struct Variation {
-    pub id: String,
-    pub key: String,
-    pub is_feature_enabled: bool,
+    id: String,
+    key: String,
+    is_feature_enabled: bool,
 }
 
 impl Variation {
@@ -26,5 +26,17 @@ impl Variation {
 
     pub fn map_entry(self) -> (String, Rc<Variation>) {
         (self.id.clone(), Rc::new(self))
+    }
+
+    pub fn id(&self) -> &str {
+        &self.id
+    }
+
+    pub fn key(&self) -> &str {
+        &self.key
+    }
+
+    pub fn is_feature_enabled(&self) -> bool {
+        self.is_feature_enabled
     }
 }

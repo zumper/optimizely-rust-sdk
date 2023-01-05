@@ -43,7 +43,7 @@ fn with_fixed_datafile() {
 
         // Check if flags are there
         assert_eq!(flags.len(), 6);
-        assert!(flags.iter().any(|flag| flag.key == "buy_button"));
-        assert!(flags.iter().any(|flag| flag.key == "qa_rollout"));
+        assert!(flags.iter().any(|flag| flag.key() == "buy_button"));
+        assert!(flags.iter().any(|flag| flag.key() == "qa_rollout"));
     }
 }

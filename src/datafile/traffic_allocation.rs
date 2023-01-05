@@ -9,7 +9,7 @@ use super::{DatafileError, Variation};
 
 #[derive(Debug)]
 pub struct TrafficAllocation {
-    pub ranges: BTreeMap<u32, Rc<Variation>>,
+    ranges: BTreeMap<u32, Rc<Variation>>,
 }
 
 impl TrafficAllocation {

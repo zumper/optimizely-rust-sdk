@@ -10,20 +10,20 @@ use super::{TrafficAllocation, Variation};
 /// Optimizely experiment
 #[derive(Debug)]
 pub struct Experiment {
-    pub id: String,
-    pub key: String,
-    pub campaign_id: String,
-    pub status: String,
-    pub traffic_allocation: TrafficAllocation,
+    id: String,
+    campaign_id: String,
+    traffic_allocation: TrafficAllocation,
 }
 
 impl Experiment {
     pub fn build(datafile: &mut JsonValue) -> Result<Experiment> {
         // Get fields as string
         let id = string_field!(datafile, "id")?;
-        let key = string_field!(datafile, "key")?;
+        let _key = string_field!(datafile, "key")?;
         let campaign_id = string_field!(datafile, "layerId")?;
-        let status = string_field!(datafile, "status")?;
+        let _status = string_field!(datafile, "status")?;
+
+        // TODO: handle different values for status
 
         // Create map of all variation so they can be looked up within TrafficAllocation
         let variations: Vec<Variation> = list_field!(datafile, "variations", Variation::build)?;
@@ -35,9 +35,7 @@ impl Experiment {
         // Initialize struct and return result
         let experiment = Experiment {
             id,
-            key,
             campaign_id,
-            status,
             traffic_allocation,
         };
         Ok(experiment)
@@ -45,5 +43,17 @@ impl Experiment {
 
     pub fn map_entry(self) -> (String, Experiment) {
         (self.id.clone(), self)
+    }
+
+    pub fn id(&self) -> &str {
+        &self.id
+    }
+
+    pub fn campaign_id(&self) -> &str {
+        &self.campaign_id
+    }
+
+    pub fn traffic_allocation(&self) -> &TrafficAllocation {
+        &self.traffic_allocation
     }
 }

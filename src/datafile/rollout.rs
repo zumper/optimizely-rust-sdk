@@ -7,8 +7,8 @@ use super::Experiment;
 
 #[derive(Debug)]
 pub struct Rollout {
-    pub id: String,
-    pub experiments: Vec<Experiment>,
+    id: String,
+    experiments: Vec<Experiment>,
 }
 
 impl Rollout {
@@ -23,5 +23,9 @@ impl Rollout {
 
     pub fn map_entry(self) -> (String, Rollout) {
         (self.id.clone(), self)
+    }
+
+    pub fn experiments(&self) -> &Vec<Experiment> {
+        &self.experiments
     }
 }
