@@ -2,8 +2,7 @@
 #![allow(dead_code)]
 
 // Imports from this crate
-use optimizely::client::Client;
-use optimizely::decision::{DecideOption, Decision};
+use optimizely::{Client, DecideOption, Decision};
 
 // This is the account ID of mark.biesheuvel@optimizely.com
 pub const ACCOUNT_ID: &str = "21537940595";

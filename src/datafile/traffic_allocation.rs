@@ -13,10 +13,7 @@ pub struct TrafficAllocation {
 }
 
 impl TrafficAllocation {
-    pub fn build(
-        value: &mut JsonValue,
-        variations: &mut HashMap<String, Rc<Variation>>,
-    ) -> Result<TrafficAllocation> {
+    pub fn build(value: &mut JsonValue, variations: &mut HashMap<String, Rc<Variation>>) -> Result<TrafficAllocation> {
         // A closure to return pairs of Variation and their end of range
         let get_allocation = |value: &mut JsonValue| -> Result<(u32, Rc<Variation>)> {
             // Get id as string

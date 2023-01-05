@@ -2,7 +2,7 @@
 macro_rules! user_attributes {
     { $( $key: expr => $value: expr),* $(,)?} => {
         {
-            let mut attribute = optimizely::user_context::UserAttributes::new();
+            let mut attribute = optimizely::UserAttributes::new();
 
             $(
                 attribute.insert($key.to_owned(), $value.to_owned());
