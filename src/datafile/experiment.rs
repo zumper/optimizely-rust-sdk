@@ -16,21 +16,21 @@ pub struct Experiment {
 }
 
 impl Experiment {
-    pub fn build(datafile: &mut JsonValue) -> Result<Experiment> {
+    pub fn build(value: &mut JsonValue) -> Result<Experiment> {
         // Get fields as string
-        let id = string_field!(datafile, "id")?;
-        let _key = string_field!(datafile, "key")?;
-        let campaign_id = string_field!(datafile, "layerId")?;
-        let _status = string_field!(datafile, "status")?;
+        let id = string_field!(value, "id")?;
+        let _key = string_field!(value, "key")?;
+        let campaign_id = string_field!(value, "layerId")?;
+        let _status = string_field!(value, "status")?;
 
         // TODO: handle different values for status
 
         // Create map of all variation so they can be looked up within TrafficAllocation
-        let variations: Vec<Variation> = list_field!(datafile, "variations", Variation::build)?;
+        let variations: Vec<Variation> = list_field!(value, "variations", Variation::build)?;
         let mut variations: HashMap<String, Rc<Variation>> = list_to_map!(variations, Variation::map_entry);
 
         // Build TrafficAllocation struct
-        let traffic_allocation = TrafficAllocation::build(datafile, &mut variations)?;
+        let traffic_allocation = TrafficAllocation::build(value, &mut variations)?;
 
         // Initialize struct and return result
         let experiment = Experiment {

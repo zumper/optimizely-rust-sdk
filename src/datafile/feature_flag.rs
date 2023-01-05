@@ -18,13 +18,13 @@ pub struct FeatureFlag {
 impl FeatureFlag {
     /// Builds a feature flag from JSON datafile
     pub fn build(
-        datafile: &mut JsonValue,
+        value: &mut JsonValue,
         rollouts: &mut HashMap<String, Rollout>,
         experiments: &mut HashMap<String, Experiment>,
     ) -> Result<FeatureFlag> {
-        let _id = string_field!(datafile, "id")?;
-        let key = string_field!(datafile, "key")?;
-        let rollout_id = string_field!(datafile, "rolloutId")?;
+        let _id = string_field!(value, "id")?;
+        let key = string_field!(value, "key")?;
+        let rollout_id = string_field!(value, "rolloutId")?;
 
         // Remove from hashmap to get an owned copy
         let rollout = rollouts
@@ -44,7 +44,7 @@ impl FeatureFlag {
             Ok(experiment)
         };
 
-        let experiments = list_field!(datafile, "experimentIds", get_experiment)?;
+        let experiments = list_field!(value, "experimentIds", get_experiment)?;
 
         let flag = FeatureFlag {
             key,

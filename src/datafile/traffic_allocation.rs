@@ -14,7 +14,7 @@ pub struct TrafficAllocation {
 
 impl TrafficAllocation {
     pub fn build(
-        datafile: &mut JsonValue,
+        value: &mut JsonValue,
         variations: &mut HashMap<String, Rc<Variation>>,
     ) -> Result<TrafficAllocation> {
         // A closure to return pairs of Variation and their end of range
@@ -39,7 +39,7 @@ impl TrafficAllocation {
         };
 
         // Create a binary tree for efficient look ups
-        let ranges: Vec<(u32, Rc<Variation>)> = list_field!(datafile, "trafficAllocation", get_allocation)?;
+        let ranges: Vec<(u32, Rc<Variation>)> = list_field!(value, "trafficAllocation", get_allocation)?;
         let ranges: BTreeMap<u32, Rc<Variation>> = ranges.into_iter().collect();
 
         // Initialize struct and return result

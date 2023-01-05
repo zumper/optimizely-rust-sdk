@@ -11,10 +11,10 @@ pub struct Variation {
 }
 
 impl Variation {
-    pub fn build(datafile: &mut JsonValue) -> Result<Variation> {
-        let id = string_field!(datafile, "id")?;
-        let key = string_field!(datafile, "key")?;
-        let is_feature_enabled = bool_field!(datafile, "featureEnabled")?;
+    pub fn build(value: &mut JsonValue) -> Result<Variation> {
+        let id = string_field!(value, "id")?;
+        let key = string_field!(value, "key")?;
+        let is_feature_enabled = bool_field!(value, "featureEnabled")?;
 
         let variation = Variation {
             id,

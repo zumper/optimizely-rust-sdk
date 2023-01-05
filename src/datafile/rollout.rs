@@ -12,10 +12,10 @@ pub struct Rollout {
 }
 
 impl Rollout {
-    pub fn build(datafile: &mut JsonValue) -> Result<Rollout> {
-        let id = string_field!(datafile, "id")?;
+    pub fn build(value: &mut JsonValue) -> Result<Rollout> {
+        let id = string_field!(value, "id")?;
 
-        let experiments = list_field!(datafile, "experiments", Experiment::build)?;
+        let experiments = list_field!(value, "experiments", Experiment::build)?;
 
         let rollout = Rollout { id, experiments };
         Ok(rollout)

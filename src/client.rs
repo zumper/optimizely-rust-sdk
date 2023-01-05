@@ -32,32 +32,35 @@ impl Client {
             .or_else(|_| Err(ClientError::FailedRequest))?;
 
         // Get response body
-        let datafile = response
+        let content = response
             .into_string()
             .or_else(|_| Err(ClientError::FailedResponse))?;
 
         // Use response to build Client
-        Client::build_from_string(&datafile)
+        Client::build_from_string(&content)
     }
 
     pub fn build_from_file(file_path: &str) -> Result<Client> {
-        // Read datafile from local path
-        let mut datafile = String::new();
+        // Read content from local path
+        let mut content = String::new();
 
         // Open file
         let mut file = File::open(file_path).or_else(|_| Err(ClientError::FailedFileOpen))?;
 
         // Read file content into String
-        file.read_to_string(&mut datafile)
+        file.read_to_string(&mut content)
             .or_else(|_| Err(ClientError::FailedFileRead))?;
 
         // Use file content to build Client
-        Client::build_from_string(&datafile)
+        Client::build_from_string(&content)
     }
 
-    pub fn build_from_string(datafile: &str) -> Result<Client> {
+    pub fn build_from_string(content: &str) -> Result<Client> {
+        // Parse content as JSON
+        let mut json_value = json::parse(content)?;
+
         // Build datafile object from string
-        let datafile = Datafile::build(datafile)?;
+        let datafile = Datafile::build(&mut json_value)?;
 
         // Create counted reference
         let datafile = Rc::new(datafile);
