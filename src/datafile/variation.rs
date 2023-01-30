@@ -58,7 +58,9 @@ impl Variation {
     pub fn build(value: &mut JsonValue) -> Result<Variation> {
         let id = string_field!(value, "id")?;
         let key = string_field!(value, "key")?;
-        let is_feature_enabled = bool_field!(value, "featureEnabled")?;
+
+        // BUG: Found an example datafile where this field is missing, therefore default to `false`
+        let is_feature_enabled = bool_field!(value, "featureEnabled").unwrap_or(false);
 
         Ok(Variation::new(id, key, is_feature_enabled))
     }

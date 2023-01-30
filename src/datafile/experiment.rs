@@ -13,6 +13,16 @@ pub struct Experiment {
     traffic_allocation: TrafficAllocation,
 }
 
+impl Default for Experiment {
+    fn default() -> Self {
+        Experiment {
+            id: "".to_owned(),
+            campaign_id: "".to_owned(),
+            traffic_allocation: TrafficAllocation::default(),
+        }
+    }
+}
+
 impl Experiment {
     pub fn build(value: &mut JsonValue) -> Result<Experiment> {
         // Get fields as string

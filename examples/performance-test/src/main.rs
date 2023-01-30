@@ -1,12 +1,12 @@
-use optimizely::client::Client;
+use optimizely::{Client, DecideOption};
 use std::error::Error;
 
-const FILE_PATH: &str = "../datafile.json";
+const FILE_PATH: &str = "../datafiles/sandbox.json";
 
 fn main() -> Result<(), Box<dyn Error>> {
     let client = Client::build_from_file(FILE_PATH)?;
     let flag_key = "buy_button";
-    let decide_options = Vec::new();
+    let decide_options = vec![DecideOption::DisableDecisionEvent];
 
     for i in 0..1_000_000 {
         let user_id = format!("user{}", i);

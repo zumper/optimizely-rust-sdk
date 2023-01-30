@@ -33,17 +33,21 @@ impl FeatureFlag {
 
         // Closure to retrieve experiment from HashMap
         let get_experiment = |value: &mut JsonValue| -> Result<Experiment> {
-            // TODO: error handling instead of .expect()
-            let experiment_id = value.take_string().expect("value should be there");
+            // Take the experiment ID from the JSON
+            let experiment_id = value
+                .take_string()
+                .ok_or(DatafileError::MissingExperimentId)?;
 
             // Remove from hashmap to get an owned copy
             let experiment = experiments
                 .remove(&experiment_id)
-                .ok_or(DatafileError::InvalidExperimentId(experiment_id))?;
+                // TODO: look for experiment id in either `groups` of `experiments`
+                .unwrap_or(Experiment::default());
 
             Ok(experiment)
         };
 
+        // TODO: handle bug where experiment ID can not be found
         let experiments = list_field!(value, "experimentIds", get_experiment)?;
 
         let flag = FeatureFlag {

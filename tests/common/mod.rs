@@ -12,7 +12,7 @@ pub const ACCOUNT_ID: &str = "21537940595";
 pub const SDK_KEY: &str = "KVpGWnzPGKvvQ8yeEWmJZ";
 
 // This is a bundled copy of the JSON file that can be downloaded with the SDK key
-pub const FILE_PATH: &str = "examples/datafile.json";
+pub const FILE_PATH: &str = "examples/datafiles/sandbox.json";
 
 // This is the revision number of the bundled datafile
 pub const REVISION: u32 = 73;
