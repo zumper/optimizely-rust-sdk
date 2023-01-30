@@ -14,8 +14,13 @@ pub type UserAttributes = HashMap<String, String>;
 
 // Constant used for the hashing algorithm
 const HASH_SEED: u32 = 1;
+
 // Ranges are specified between 0 and 10_000
 const MAX_OF_RANGE: f64 = 10_000 as f64;
+
+// Information regarding the SDK client
+const CLIENT_NAME: &str = "rust-sdk";
+const CLIENT_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 #[derive(Debug)]
 pub struct UserContext {
@@ -189,8 +194,8 @@ impl UserContext {
             "visitors": [visitor],
             "enrich_decisions": true,
             "anonymize_ip": true,
-            "client_name": "rust-sdk",
-            "client_version": "0.0.1",
+            "client_name": CLIENT_NAME,
+            "client_version": CLIENT_VERSION,
         };
 
         // Make POST request
