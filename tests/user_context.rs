@@ -20,5 +20,5 @@ fn user_context_attributes() {
     };
 
     // Attributes should be equal to expected
-    assert_eq!(*user_context.get_attributes(), expected);
+    assert_eq!(*user_context.attributes(), expected);
 }

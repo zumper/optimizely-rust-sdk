@@ -1,13 +1,12 @@
 // External imports
-use anyhow::Result;
 use fasthash::murmur3::hash32_with_seed as murmur3_hash;
 use std::collections::HashMap;
 use std::rc::Rc;
-use std::time::SystemTime;
 
 // Imports from parent
-use super::datafile::{Datafile, Experiment, FeatureFlag, Variation};
+use super::datafile::{Experiment, FeatureFlag, Variation};
 use super::decision::{DecideOption, Decision};
+use super::Client;
 
 // Custom type alias
 pub type UserAttributes = HashMap<String, String>;
@@ -18,30 +17,21 @@ const HASH_SEED: u32 = 1;
 // Ranges are specified between 0 and 10_000
 const MAX_OF_RANGE: f64 = 10_000 as f64;
 
-// Information regarding the SDK client
-const CLIENT_NAME: &str = "rust-sdk";
-const CLIENT_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 #[derive(Debug)]
-pub struct UserContext {
-    datafile: Rc<Datafile>,
-    user_id: String,
+pub struct UserContext<'a> {
+    client: &'a Client,
+    user_id: &'a str,
     attributes: UserAttributes,
 }
 
-impl UserContext {
-    pub fn new(datafile: &Rc<Datafile>, user_id: &str) -> UserContext {
-        // Create a clone of the reference, thus increasing the count
-        let datafile = Rc::clone(&datafile);
-
-        // Create owned copy of user_id
-        let user_id = user_id.to_owned();
-
+impl UserContext<'_> {
+    pub fn new<'a>(client: &'a Client, user_id: &'a str) -> UserContext<'a> {
         // Create an empty set of user attributes
         let attributes = UserAttributes::new();
 
         UserContext {
-            datafile,
+            client,
             user_id,
             attributes,
         }
@@ -58,14 +48,20 @@ impl UserContext {
         self.attributes.insert(key, value);
     }
 
-    pub fn get_attributes(&self) -> &UserAttributes {
+    /// Getter for `user_id` field
+    pub fn user_id(&self) -> &str {
+        &self.user_id
+    }
+
+    pub fn attributes(&self) -> &UserAttributes {
         // Return borrowed reference to attributes
         &self.attributes
     }
 
+
     pub fn decide<'a, 'b>(&'a self, flag_key: &'b str, options: &Vec<DecideOption>) -> Decision<'b> {
         // Retrieve Flag object
-        let flag = match self.datafile.get_flag(flag_key) {
+        let flag = match self.client.datafile.get_flag(flag_key) {
             Some(flag) => flag,
             None => {
                 // When flag key cannot be found, return the off variation
@@ -93,8 +89,6 @@ impl UserContext {
     }
 
     fn get_variation_for_flag(&self, flag: &FeatureFlag, send_decision: bool) -> Option<Rc<Variation>> {
-        // TODO: don't send decision if DecideOption.DisableDecisionEvent is set
-
         // Find first Experiment for which this user qualifies
         let result = flag
             .experiments()
@@ -143,69 +137,11 @@ impl UserContext {
                 if send_decision {
                     // Send out a decision event as a side effect
                     // Ignore result of the send_decision function
-                    let _ = self.send_decision(experiment, Rc::clone(&variation));
+                    let _ = self.client.event_dispatcher.send_decision(self, experiment, Rc::clone(&variation));
                 }
                 Some(variation)
             }
             None => None,
         }
-    }
-
-    fn send_decision(&self, experiment: &Experiment, variation: Rc<Variation>) -> Result<()> {
-        // Get timestamp as milliseconds since the epoch
-        // NOTE: Convert to u64 as json::object does not support u128
-        let timestamp = SystemTime::now()
-            .duration_since(SystemTime::UNIX_EPOCH)?
-            .as_millis() as u64;
-
-        // Decision object
-        let decision = json::object! {
-            "campaign_id": experiment.campaign_id().to_owned(),
-            "experiment_id": experiment.id().to_owned(),
-            "variation_id": variation.id().to_owned(),
-            "is_campaign_holdback": false,
-        };
-
-        // Event object
-        let event = json::object! {
-            "entity_id": experiment.campaign_id().to_owned(),
-            "type": "campaign_activated",
-            "timestamp": timestamp,
-            "uuid": 1,
-        };
-
-        // Snapshot object
-        let snapshot = json::object! {
-            "decisions": [decision],
-            "events": [event],
-        };
-
-        // Visitor object
-        let visitor = json::object! {
-            "visitor_id": self.user_id.to_owned(),
-            "snapshots": [snapshot],
-        };
-
-        // TODO: queue these decisions and send in batches
-
-        // POST request payload
-        let payload = json::object! {
-            "account_id": self.datafile.account_id().to_owned(),
-            "visitors": [visitor],
-            "enrich_decisions": true,
-            "anonymize_ip": true,
-            "client_name": CLIENT_NAME,
-            "client_version": CLIENT_VERSION,
-        };
-
-        // Make POST request
-        let response = ureq::post("https://logx.optimizely.com/v1/events")
-            .set("content-type", "application/json")
-            .send_string(&payload.dump())?;
-
-        // Ignore response
-        drop(response);
-
-        Ok(())
     }
 }

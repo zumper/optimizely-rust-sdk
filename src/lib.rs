@@ -15,3 +15,4 @@ mod client;
 mod datafile;
 mod decision;
 mod user_context;
+mod event;

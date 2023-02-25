@@ -4,11 +4,11 @@
 use anyhow::Result;
 use std::fs::File;
 use std::io::Read;
-use std::rc::Rc;
 
 // Imports from parent
 use super::datafile::{Datafile, FeatureFlag};
 use super::user_context::UserContext;
+use super::event::SimpleEventDispatcher;
 
 // Relative imports of sub modules
 pub use error::ClientError;
@@ -17,7 +17,8 @@ mod error;
 
 #[derive(Debug)]
 pub struct Client {
-    datafile: Rc<Datafile>,
+    pub(crate) datafile: Datafile,
+    pub(crate) event_dispatcher: Box<SimpleEventDispatcher>, // TODO: use trait
 }
 
 impl Client {
@@ -37,7 +38,7 @@ impl Client {
             .or_else(|_| Err(ClientError::FailedResponse))?;
 
         // Use response to build Client
-        Client::build_from_string(&content)
+        Client::build_from_string(content)
     }
 
     pub fn build_from_file(file_path: &str) -> Result<Client> {
@@ -52,22 +53,26 @@ impl Client {
             .or_else(|_| Err(ClientError::FailedFileRead))?;
 
         // Use file content to build Client
-        Client::build_from_string(&content)
+        Client::build_from_string(content)
     }
 
-    pub fn build_from_string(content: &str) -> Result<Client> {
+    pub fn build_from_string(content: String) -> Result<Client> {
         // Parse content as JSON
-        let mut json_value = json::parse(content)?;
+        let mut json_value = json::parse(&content)?;
 
         // Build datafile object from string
         let datafile = Datafile::build(&mut json_value)?;
 
-        // Create counted reference
-        let datafile = Rc::new(datafile);
+        // Retrieve account ID from datafile
+        let account_id = datafile.account_id().to_owned();
 
         // TODO: other properties of client
+        let event_dispatcher = Box::new(SimpleEventDispatcher::new(account_id));
 
-        Ok(Client { datafile })
+        Ok(Client { 
+            datafile,
+            event_dispatcher,
+        })
     }
 
     pub fn account_id(&self) -> &str {
@@ -82,7 +87,7 @@ impl Client {
         self.datafile.feature_flags()
     }
 
-    pub fn create_user_context(&self, user_id: &str) -> UserContext {
-        UserContext::new(&self.datafile, user_id)
+    pub fn create_user_context<'a>(&'a self, user_id: &'a str) -> UserContext {
+        UserContext::new(self, user_id)
     }
 }

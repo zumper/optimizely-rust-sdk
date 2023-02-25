@@ -8,7 +8,8 @@ mod common;
 #[test]
 fn with_empty_datafile() {
     // Empty datafile is invalid
-    let result = Client::build_from_string(r"");
+    let empty_string = "".to_owned();
+    let result = Client::build_from_string(empty_string);
     matches!(result, Err(_));
 }
 
