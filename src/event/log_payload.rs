@@ -135,7 +135,7 @@ impl LogVisitor {
     }
 }
 
-pub(super) struct LogPayload {
+pub(crate) struct LogPayload {
     account_id: String,
     visitors: HashMap<String, LogVisitor>,
 }

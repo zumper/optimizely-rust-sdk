@@ -4,8 +4,8 @@ use json::JsonValue;
 use std::collections::{BTreeMap, HashMap};
 use std::rc::Rc;
 
-// Imports from parent
-use super::{DatafileError, Variation};
+// Imports from crate
+use crate::datafile::{DatafileError, Variation};
 
 #[derive(Debug)]
 pub struct TrafficAllocation {

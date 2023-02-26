@@ -6,13 +6,13 @@ mod macros;
 
 // Reimport/export of structs to make them available at top-level
 pub use client::Client;
-pub use datafile::{Datafile, Variation};
+pub use datafile::Datafile;
 pub use decision::{DecideOption, Decision};
 pub use user_context::{UserAttributes, UserContext};
 
 // Regular modules
 mod client;
-mod datafile;
+pub mod datafile;
 mod decision;
 mod user_context;
 mod event;

@@ -2,8 +2,8 @@
 use anyhow::Result;
 use json::JsonValue;
 
-// Imports from parent
-use super::Experiment;
+// Imports from crate
+use crate::datafile::Experiment;
 
 #[derive(Debug)]
 pub struct Rollout {

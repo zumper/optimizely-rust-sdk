@@ -3,10 +3,9 @@ use fasthash::murmur3::hash32_with_seed as murmur3_hash;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-// Imports from parent
-use super::datafile::{Experiment, FeatureFlag, Variation};
-use super::decision::{DecideOption, Decision};
-use super::Client;
+// Imports from crate
+use crate::datafile::{Experiment, FeatureFlag, Variation};
+use crate::{Client, DecideOption, Decision};
 
 // Custom type alias
 pub type UserAttributes = HashMap<String, String>;

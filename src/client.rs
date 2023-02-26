@@ -1,9 +1,8 @@
 //! Everything related to make web requests to Optimizely
 
-// Imports from parent
-use super::datafile::Datafile;
-use super::user_context::UserContext;
-use super::event::{SimpleEventDispatcher, EventDispatcher};
+// Imports from crate
+use crate::{Datafile, UserContext};
+use crate::event::{SimpleEventDispatcher, EventDispatcher};
 
 pub struct Client {
     pub(crate) datafile: Datafile,

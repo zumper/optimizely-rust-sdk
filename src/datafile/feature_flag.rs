@@ -3,8 +3,8 @@ use anyhow::Result;
 use json::JsonValue;
 use std::collections::HashMap;
 
-// Imports from parent
-use super::{DatafileError, Experiment, Rollout};
+// Imports from crate
+use crate::datafile::{DatafileError, Experiment, Rollout};
 
 /// Optimizely feature flag.
 #[derive(Debug)]

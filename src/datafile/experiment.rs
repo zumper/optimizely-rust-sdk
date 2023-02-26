@@ -2,8 +2,8 @@
 use anyhow::Result;
 use json::JsonValue;
 
-// Imports from parent
-use super::{TrafficAllocation, Variation};
+// Imports from crate
+use crate::datafile::{TrafficAllocation, Variation};
 
 /// Optimizely experiment
 #[derive(Debug)]

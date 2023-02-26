@@ -1,10 +1,10 @@
 // External imports
 use std::rc::Rc;
 
-// Imports from parent
-use super::super::datafile::{Experiment, Variation};
-use super::super::UserContext;
-use super::{EventDispatcher, LogPayload};
+// Imports from crate
+use crate::datafile::{Experiment, Variation};
+use crate::event::{EventDispatcher, LogPayload};
+use crate::UserContext;
 
 pub struct SimpleEventDispatcher {
     account_id: String,

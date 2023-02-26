@@ -23,7 +23,7 @@ impl Variation {
     ///
     /// # Examples
     /// ```rust
-    /// use optimizely::Variation;
+    /// use optimizely::datafile::Variation;
     ///
     /// let variation = Variation::new("58054".into(), "on".into(), true);
     ///
@@ -42,7 +42,7 @@ impl Variation {
     ///
     /// # Examples
     /// ```rust
-    /// use optimizely::Variation;
+    /// use optimizely::datafile::Variation;
     ///
     /// let mut value = json::object! {
     ///     "id": "58054",
@@ -66,7 +66,7 @@ impl Variation {
     }
 
     /// Converts a list of variations to a HashMap
-    pub(super) fn list_to_map(variations: Vec<Variation>) -> HashMap<String, Rc<Variation>> {
+    pub(crate) fn list_to_map(variations: Vec<Variation>) -> HashMap<String, Rc<Variation>> {
         variations
             .into_iter()
             .map(|variation| (variation.id.to_owned(), Rc::new(variation)))
