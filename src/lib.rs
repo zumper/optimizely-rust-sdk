@@ -5,8 +5,8 @@
 mod macros;
 
 // Reimport/export of structs to make them available at top-level
-pub use client::{Client, ClientError};
-pub use datafile::{Variation};
+pub use client::Client;
+pub use datafile::{Datafile, Variation};
 pub use decision::{DecideOption, Decision};
 pub use user_context::{UserAttributes, UserContext};
 

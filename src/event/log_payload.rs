@@ -6,14 +6,13 @@ use uuid::Uuid;
 
 // Information about the API endpoint
 const ENDPOINT_URL: &str = "https://logx.optimizely.com/v1/events";
-const CONTENT_TYPE_KEY: &str= "content-type";
-const CONTENT_TYPE_VALUE: &str= "application/json";
+const CONTENT_TYPE_KEY: &str = "content-type";
+const CONTENT_TYPE_VALUE: &str = "application/json";
 
 // Information regarding the SDK client
 const CLIENT_NAME: &str = "rust-sdk";
 const CLIENT_VERSION: &str = env!("CARGO_PKG_VERSION");
 
-#[derive(Debug)]
 struct LogDecision {
     campaign_id: String,
     experiment_id: String,
@@ -41,7 +40,6 @@ impl LogDecision {
     }
 }
 
-#[derive(Debug)]
 struct LogEvent {
     uuid: String,
     timestamp: u64,
@@ -87,7 +85,6 @@ impl LogEvent {
     }
 }
 
-#[derive(Debug)]
 struct LogVisitor {
     visitor_id: String,
     // attributes
@@ -138,7 +135,6 @@ impl LogVisitor {
     }
 }
 
-#[derive(Debug)]
 pub(super) struct LogPayload {
     account_id: String,
     visitors: HashMap<String, LogVisitor>,
@@ -212,6 +208,5 @@ impl LogPayload {
                 dbg!(error);
             }
         }
-
     }
 }

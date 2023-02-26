@@ -17,8 +17,6 @@ const HASH_SEED: u32 = 1;
 // Ranges are specified between 0 and 10_000
 const MAX_OF_RANGE: f64 = 10_000 as f64;
 
-
-#[derive(Debug)]
 pub struct UserContext<'a> {
     client: &'a Client,
     user_id: &'a str,
