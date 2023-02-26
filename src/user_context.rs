@@ -137,7 +137,7 @@ impl UserContext<'_> {
                 if send_decision {
                     // Send out a decision event as a side effect
                     // Ignore result of the send_decision function
-                    let _ = self.client.event_dispatcher.send_decision(self, experiment, Rc::clone(&variation));
+                    self.client.event_dispatcher.send_decision(self, experiment, Rc::clone(&variation));
                 }
                 Some(variation)
             }
