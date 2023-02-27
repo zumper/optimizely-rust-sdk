@@ -2,26 +2,38 @@
 
 // Imports from crate
 use crate::{Datafile, UserContext};
-use crate::event::{SimpleEventDispatcher, EventDispatcher};
+use crate::event::EventDispatcher;
+
+// Relative imports of sub modules
+use error::ClientError;
+pub use builder::ClientBuilder;
+
+mod error;
+mod builder;
+
 
 pub struct Client {
-    pub(crate) datafile: Datafile,
-    pub(crate) event_dispatcher: Box<dyn EventDispatcher>,
+    datafile: Datafile,
+    event_dispatcher: Box<dyn EventDispatcher>,
 }
 
 impl Client {
-    // TODO: create several constructors with different options
-    pub fn new(datafile: Datafile) -> Client {
-        let account_id = datafile.account_id().to_owned();
-        let event_dispatcher = SimpleEventDispatcher::new(account_id);
-
-        Client {
-            datafile,
-            event_dispatcher: Box::new(event_dispatcher),
-        }
-    }
-
     pub fn create_user_context<'a>(&'a self, user_id: &'a str) -> UserContext {
         UserContext::new(self, user_id)
+    }
+
+    /// Getter for `account_id` field of `datafile`
+    pub fn account_id(&self) -> &str {
+        &self.datafile.account_id()
+    }
+
+    /// Getter for `event_dispatcher` field
+    pub(crate) fn datafile(&self) -> &Datafile {
+        &&self.datafile
+    }
+
+    /// Getter for `event_dispatcher` field
+    pub(crate) fn event_dispatcher(&self) -> &Box<dyn EventDispatcher> {
+        &self.event_dispatcher
     }
 }

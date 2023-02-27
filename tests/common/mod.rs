@@ -2,7 +2,7 @@
 #![allow(dead_code)]
 
 // Imports from this crate
-use optimizely::{Client, Datafile, DecideOption, Decision};
+use optimizely::{Client, ClientBuilder, Datafile, DecideOption, Decision};
 
 // This is the account ID of mark.biesheuvel@optimizely.com
 pub const ACCOUNT_ID: &str = "21537940595";
@@ -20,7 +20,11 @@ pub const REVISION: u32 = 73;
 // Helper function create a fixed client
 pub fn get_client() -> Client {
     let datafile = Datafile::build_from_file(FILE_PATH).expect("local file should work");
-    Client::new(datafile)
+
+    ClientBuilder::new()
+        .with_datafile(datafile)
+        .build()
+        .expect("build should work")
 }
 
 pub fn get_decision<'a, 'b>(user_id: &'b str, flag_key: &'a str) -> Decision<'a> {

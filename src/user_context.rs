@@ -45,11 +45,17 @@ impl UserContext<'_> {
         self.attributes.insert(key, value);
     }
 
+    /// Getter for `client` field
+    pub fn client(&self) -> &Client {
+        &self.client
+    }
+
     /// Getter for `user_id` field
     pub fn user_id(&self) -> &str {
         &self.user_id
     }
 
+    /// Getter for `attributes` field
     pub fn attributes(&self) -> &UserAttributes {
         // Return borrowed reference to attributes
         &self.attributes
@@ -58,7 +64,7 @@ impl UserContext<'_> {
 
     pub fn decide<'a, 'b>(&'a self, flag_key: &'b str, options: &Vec<DecideOption>) -> Decision<'b> {
         // Retrieve Flag object
-        let flag = match self.client.datafile.get_flag(flag_key) {
+        let flag = match self.client.datafile().get_flag(flag_key) {
             Some(flag) => flag,
             None => {
                 // When flag key cannot be found, return the off variation
@@ -134,7 +140,7 @@ impl UserContext<'_> {
                 if send_decision {
                     // Send out a decision event as a side effect
                     // Ignore result of the send_decision function
-                    self.client.event_dispatcher.send_decision(self, experiment, Rc::clone(&variation));
+                    self.client.event_dispatcher().send_decision(self, experiment, Rc::clone(&variation));
                 }
                 Some(variation)
             }
