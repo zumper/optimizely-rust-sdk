@@ -1,15 +1,12 @@
-use optimizely::{ClientBuilder, Datafile, SimpleEventDispatcher};
+use optimizely::{ClientBuilder, BatchedEventDispatcher};
 use std::error::Error;
 
 const SDK_KEY: &str = "KVpGWnzPGKvvQ8yeEWmJZ";
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let datafile = Datafile::build_from_sdk_key(SDK_KEY)?;
-    let event_dispatcher = SimpleEventDispatcher::new();
-
     let client = ClientBuilder::new()
-        .with_datafile(datafile)
-        .with_event_dispatcher(event_dispatcher)
+        .with_sdk_key(SDK_KEY)?
+        .with_event_dispatcher(BatchedEventDispatcher::new())
         .build()?;
     
     let flag_key = "buy_button";

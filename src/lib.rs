@@ -9,7 +9,7 @@ pub use client::{Client, ClientBuilder};
 pub use datafile::Datafile;
 pub use decision::{DecideOption, Decision};
 pub use user_context::{UserAttributes, UserContext};
-pub use event::SimpleEventDispatcher;
+pub use event::{SimpleEventDispatcher, BatchedEventDispatcher};
 
 // Regular modules
 mod client;
