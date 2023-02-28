@@ -24,12 +24,17 @@ impl Client {
 
     /// Getter for `account_id` field of `datafile`
     pub fn account_id(&self) -> &str {
-        &self.datafile.account_id()
+        self.datafile.account_id()
     }
 
-    /// Getter for `event_dispatcher` field
+    /// Getter for `revision` field of `datafile`
+    pub fn revision(&self) -> u32 {
+        self.datafile.revision()
+    }
+
+    /// Getter for `datafile` field
     pub(crate) fn datafile(&self) -> &Datafile {
-        &&self.datafile
+        &self.datafile
     }
 
     /// Getter for `event_dispatcher` field
