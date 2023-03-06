@@ -5,3 +5,5 @@ edition = "2021"
 
 [dependencies]
 optimizely = {path="../.."}
+env_logger = "0.10.0"
+log = "0.4.17"

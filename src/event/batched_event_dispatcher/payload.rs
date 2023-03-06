@@ -28,6 +28,8 @@ impl BatchedPayload {
         experiment_id: String,
         variation_id: String,
     ) {
+        log::debug!("Adding decision event to log payload");
+
         // Add to the existing payload or create a new one
         match self.payload_option.as_mut() {
             None => {
@@ -50,6 +52,7 @@ impl BatchedPayload {
         self.counter += 1;
 
         if self.counter >= DEFAULT_BATCH_THRESHOLD {
+            log::debug!("Reached DEFAULT_BATCH_THRESHOLD");
             self.send();
         }
     }
@@ -58,13 +61,18 @@ impl BatchedPayload {
         // Take ownership of payload and leave behind None (for next iteration)
         match self.payload_option.take() {
             Some(payload) => {
+                // Sending payload
+                log::debug!("Sending log payload to Optimizely");
+
                 // Send payload to endpoint
                 payload.send();
+
                 // Reset counter
                 self.counter = 0;
             }
             None => {
                 // Nothing to send
+                log::debug!("No log payload to send");
             }
         }
     }
@@ -72,6 +80,8 @@ impl BatchedPayload {
 
 impl Drop for BatchedPayload {
     fn drop(&mut self) {
+        log::debug!("Dropping BatchedPayload");
+
         // If the BatchedLogPayload is dropped, send one last payload
         self.send()
     }

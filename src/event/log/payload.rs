@@ -33,6 +33,8 @@ impl Payload {
         experiment_id: String,
         variation_id: String,
     ) {
+        log::debug!("Adding decision event to log payload");
+
         // Use a copy of visitor id as the key
         let key = visitor_id.clone();
 
@@ -67,6 +69,8 @@ impl Payload {
     }
 
     pub fn send(self) {
+        log::debug!("Sending log payload to Optimizely");
+
         // Convert to JSON document and dump as String
         let body = self.as_json().dump();
 
@@ -75,13 +79,14 @@ impl Payload {
             .set(CONTENT_TYPE_KEY, CONTENT_TYPE_VALUE)
             .send_string(&body)
         {
-            Ok(response) => {
+            Ok(_) => {
                 // TODO: process response
-                dbg!(response);
+                // TODO: include some data in log message
+                log::info!("Log payload succesfully sent to Optimizely");
             }
-            Err(error) => {
+            Err(_) => {
                 // TODO: process error
-                dbg!(error);
+                log::error!("Error while sending log payload");
             }
         }
     }

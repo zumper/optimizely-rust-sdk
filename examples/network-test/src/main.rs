@@ -1,9 +1,18 @@
 use optimizely::{ClientBuilder, BatchedEventDispatcher};
 use std::error::Error;
+use env_logger::Target;
+use log::LevelFilter;
 
 const SDK_KEY: &str = "KVpGWnzPGKvvQ8yeEWmJZ";
 
 fn main() -> Result<(), Box<dyn Error>> {
+    // Always set log level to debug
+    env_logger::builder()
+        .target(Target::Stdout)
+        .filter_module("optimizely", LevelFilter::Debug)
+        .init();
+
+    // Initiate client using SDK key and batched event dispatcher
     let client = ClientBuilder::new()
         .with_sdk_key(SDK_KEY)?
         .with_event_dispatcher(BatchedEventDispatcher::new())
