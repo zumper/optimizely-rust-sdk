@@ -3,7 +3,7 @@ use std::rc::Rc;
 
 // Imports from crate
 use crate::datafile::{Experiment, Variation};
-use crate::event::{EventDispatcher, LogPayload};
+use crate::event::{log::Payload, EventDispatcher};
 use crate::UserContext;
 
 pub struct SimpleEventDispatcher {}
@@ -17,7 +17,7 @@ impl SimpleEventDispatcher {
 impl EventDispatcher for SimpleEventDispatcher {
     fn send_decision(&self, user_context: &UserContext, experiment: &Experiment, variation: Rc<Variation>) {
         // Generate a payload for a single decision event
-        let mut payload = LogPayload::new(user_context.client().account_id().to_owned());
+        let mut payload = Payload::new(user_context.client().account_id().to_owned());
 
         // Add single decision
         payload.add_decision(
