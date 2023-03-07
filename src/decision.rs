@@ -1,6 +1,6 @@
 // Relative imports of sub modules
-pub use decide_option::DecideOption;
-mod decide_option;
+pub use decide_options::DecideOptions;
+mod decide_options;
 
 // Inspiration: https://docs.developers.optimizely.com/experimentation/v4.0.0-full-stack/docs/optimizelydecision-python
 

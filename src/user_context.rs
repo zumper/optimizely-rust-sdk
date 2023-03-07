@@ -5,7 +5,7 @@ use std::rc::Rc;
 
 // Imports from crate
 use crate::datafile::{Experiment, FeatureFlag, Variation};
-use crate::{Client, DecideOption, Decision};
+use crate::{Client, DecideOptions, Decision};
 
 // Custom type alias
 pub type UserAttributes = HashMap<String, String>;
@@ -61,8 +61,12 @@ impl UserContext<'_> {
         &self.attributes
     }
 
+    pub fn decide<'a, 'b>(&'a self, flag_key: &'b str) -> Decision<'b> {
+        let options = DecideOptions::default();
+        self.decide_with_options(flag_key, &options)
+    }
 
-    pub fn decide<'a, 'b>(&'a self, flag_key: &'b str, options: &Vec<DecideOption>) -> Decision<'b> {
+    pub fn decide_with_options<'a, 'b>(&'a self, flag_key: &'b str, options: &DecideOptions) -> Decision<'b> {
         // Retrieve Flag object
         let flag = match self.client.datafile().get_flag(flag_key) {
             Some(flag) => flag,
@@ -73,10 +77,8 @@ impl UserContext<'_> {
             }
         };
 
-        // Only send decision events if the DisableDecisionEvent option is not included
-        let send_decision = !options
-            .iter()
-            .any(|option| *option == DecideOption::DisableDecisionEvent);
+        // Only send decision events if the disable_decision_event option is false
+        let send_decision = !options.disable_decision_event;
 
         // Get the selected variation for the given flag
         match self.get_variation_for_flag(flag, send_decision) {
