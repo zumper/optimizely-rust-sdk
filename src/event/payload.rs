@@ -2,8 +2,14 @@
 use json::JsonValue;
 use std::collections::HashMap;
 
-// Imports from crate
-use crate::event::log::Visitor;
+// Relative imports of sub modules
+use decision::Decision;
+use event::Event;
+use visitor::Visitor;
+
+mod decision;
+mod event;
+mod visitor;
 
 // Information about the API endpoint
 const ENDPOINT_URL: &str = "https://logx.optimizely.com/v1/events";

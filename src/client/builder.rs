@@ -5,8 +5,8 @@ use std::io::Read;
 
 // Imports from crate
 use crate::client::{Client, ClientError};
+use crate::datafile::Datafile;
 use crate::event::{EventDispatcher, SimpleEventDispatcher};
-use crate::Datafile;
 
 pub struct ClientBuilder {
     datafile: Option<Datafile>,

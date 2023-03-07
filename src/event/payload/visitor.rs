@@ -2,7 +2,7 @@
 use json::JsonValue;
 
 // Imports from crate
-use crate::event::log::{Decision, Event};
+use crate::event::payload::{Decision, Event};
 
 pub struct Visitor {
     visitor_id: String,

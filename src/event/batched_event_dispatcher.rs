@@ -10,14 +10,10 @@ use crate::UserContext;
 
 // Relative imports of sub modules
 use payload::BatchedPayload;
-mod payload;
+use thread_message::ThreadMessage;
 
-// When sending a message to the thread, it can either be a decision event or conversion event
-#[allow(dead_code)]
-enum ThreadMessage {
-    Decision(String, String, String, String, String),
-    Conversion(),
-}
+mod payload;
+mod thread_message;
 
 // https://users.rust-lang.org/t/spawn-threads-and-join-in-destructor/1613/9
 pub struct BatchedEventDispatcher {

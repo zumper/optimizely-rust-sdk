@@ -3,7 +3,7 @@ use std::rc::Rc;
 
 // Imports from crate
 use crate::datafile::{Experiment, Variation};
-use crate::event::{log::Payload, EventDispatcher};
+use crate::event::{EventDispatcher, Payload};
 use crate::UserContext;
 
 pub struct SimpleEventDispatcher {}

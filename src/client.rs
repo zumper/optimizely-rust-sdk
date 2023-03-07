@@ -1,7 +1,8 @@
 //! Everything related to make web requests to Optimizely
 
 // Imports from crate
-use crate::{Datafile, UserContext};
+use crate::UserContext;
+use crate::datafile::Datafile;
 use crate::event::EventDispatcher;
 
 // Relative imports of sub modules

@@ -1,5 +1,5 @@
 // Imports from crate
-use crate::event::log::Payload;
+use crate::event::Payload;
 
 // Upper limit to number of events in a batch
 const DEFAULT_BATCH_THRESHOLD: u16 = 10;
