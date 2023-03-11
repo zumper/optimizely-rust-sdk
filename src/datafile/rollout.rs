@@ -1,6 +1,6 @@
 // External imports
 use anyhow::Result;
-use json::JsonValue;
+use serde_json::Value as JsonValue;
 
 // Imports from crate
 use crate::datafile::Experiment;
@@ -13,12 +13,14 @@ pub struct Rollout {
 
 impl Rollout {
     pub fn build(value: &mut JsonValue) -> Result<Rollout> {
-        let id = string_field!(value, "id")?;
+        let id = string_field!(value, "id");
 
-        let experiments = list_field!(value, "experiments", Experiment::build)?;
+        let experiments = list_field!(value, "experiments", Experiment::build);
 
-        let rollout = Rollout { id, experiments };
-        Ok(rollout)
+        Ok(Rollout {
+            id: id.to_owned(),
+            experiments,
+        })
     }
 
     pub fn map_entry(self) -> (String, Rollout) {

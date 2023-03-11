@@ -13,29 +13,36 @@ macro_rules! user_attributes {
     };
 }
 
+macro_rules! missing_field {
+    ($name: expr) => {
+        crate::datafile::DatafileError::MissingField(String::from($name))
+    }
+}
+
 macro_rules! bool_field {
     ($value: ident, $name: expr) => {
         $value[$name]
             .take()
             .as_bool()
-            .ok_or(crate::datafile::DatafileError::MissingField(String::from($name)))
+            .ok_or(missing_field!($name))?
     };
 }
 
-macro_rules! u32_field {
+macro_rules! u64_field {
     ($value: ident, $name: expr) => {
         $value[$name]
             .take()
-            .as_u32()
-            .ok_or(crate::datafile::DatafileError::MissingField(String::from($name)))
+            .as_u64()
+            .ok_or(missing_field!($name))?
     };
 }
 
 macro_rules! string_field {
     ($value: ident, $name: expr) => {
-        $value[$name]
-            .take_string()
-            .ok_or(crate::datafile::DatafileError::MissingField(String::from($name)))
+        {
+            let owned_value = $value[$name].take();
+            owned_value.as_str().ok_or(missing_field!($name))?.to_owned()
+        }
     };
 }
 
@@ -43,9 +50,11 @@ macro_rules! list_field {
     ($value: ident, $name: expr, $closure: expr) => {
         $value[$name]
             .take()
-            .members_mut()
+            .as_array_mut()
+            .ok_or(missing_field!($name))?
+            .into_iter()
             .map($closure)
-            .collect::<anyhow::Result<Vec<_>>>()
+            .collect::<anyhow::Result<Vec<_>>>()?
     };
 }
 

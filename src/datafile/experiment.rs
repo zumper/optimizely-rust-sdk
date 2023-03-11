@@ -1,6 +1,6 @@
 // External imports
 use anyhow::Result;
-use json::JsonValue;
+use serde_json::Value as JsonValue;
 
 // Imports from crate
 use crate::datafile::{TrafficAllocation, Variation};
@@ -26,15 +26,15 @@ impl Default for Experiment {
 impl Experiment {
     pub fn build(value: &mut JsonValue) -> Result<Experiment> {
         // Get fields as string
-        let id = string_field!(value, "id")?;
-        let _key = string_field!(value, "key")?;
-        let campaign_id = string_field!(value, "layerId")?;
-        let _status = string_field!(value, "status")?;
+        let id = string_field!(value, "id");
+        let _key = string_field!(value, "key");
+        let campaign_id = string_field!(value, "layerId");
+        let _status = string_field!(value, "status");
 
         // TODO: handle different values for status
 
         // Create map of all variation so they can be looked up within TrafficAllocation
-        let variations = list_field!(value, "variations", Variation::build)?;
+        let variations = list_field!(value, "variations", Variation::build);
         let mut variations = Variation::list_to_map(variations);
 
         // Build TrafficAllocation struct

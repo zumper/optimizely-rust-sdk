@@ -130,7 +130,7 @@ impl UserContext<'_> {
         let hash_value = murmur3_hash(bucketing_key.as_bytes(), HASH_SEED);
 
         // Bring the hash into a range of 0 to 10_000
-        let bucket_value = ((hash_value as f64) / (u32::MAX as f64) * MAX_OF_RANGE) as u32;
+        let bucket_value = ((hash_value as f64) / (u32::MAX as f64) * MAX_OF_RANGE) as u64;
 
         // Get the variation according to the traffic allocation
         let result = experiment

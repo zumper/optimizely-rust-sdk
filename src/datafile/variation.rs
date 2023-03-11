@@ -1,6 +1,6 @@
 // External imports
 use anyhow::Result;
-use json::JsonValue;
+use serde_json::Value as JsonValue;
 use std::collections::HashMap;
 use std::rc::Rc;
 
@@ -44,11 +44,11 @@ impl Variation {
     /// ```rust
     /// use optimizely::datafile::Variation;
     ///
-    /// let mut value = json::object! {
+    /// let mut value = serde_json::json!({
     ///     "id": "58054",
     ///     "key": "on",
     ///     "featureEnabled": true,
-    /// };
+    /// });
     ///
     /// let variation = Variation::build(&mut value).unwrap();
     ///
@@ -56,11 +56,12 @@ impl Variation {
     /// assert_eq!(variation.is_feature_enabled(), true);
     /// ```
     pub fn build(value: &mut JsonValue) -> Result<Variation> {
-        let id = string_field!(value, "id")?;
-        let key = string_field!(value, "key")?;
+        let id = string_field!(value, "id");
+        let key = string_field!(value, "key");
 
+        // TODO: fix bug below again
         // BUG: Found an example datafile where this field is missing, therefore default to `false`
-        let is_feature_enabled = bool_field!(value, "featureEnabled").unwrap_or(false);
+        let is_feature_enabled = bool_field!(value, "featureEnabled");
 
         Ok(Variation::new(id, key, is_feature_enabled))
     }

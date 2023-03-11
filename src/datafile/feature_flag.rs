@@ -1,6 +1,6 @@
 // External imports
 use anyhow::Result;
-use json::JsonValue;
+use serde_json::Value as JsonValue;
 use std::collections::HashMap;
 
 // Imports from crate
@@ -22,9 +22,9 @@ impl FeatureFlag {
         rollouts: &mut HashMap<String, Rollout>,
         experiments: &mut HashMap<String, Experiment>,
     ) -> Result<FeatureFlag> {
-        let _id = string_field!(value, "id")?;
-        let key = string_field!(value, "key")?;
-        let rollout_id = string_field!(value, "rolloutId")?;
+        let _id = string_field!(value, "id");
+        let key = string_field!(value, "key");
+        let rollout_id = string_field!(value, "rolloutId");
 
         // Remove from hashmap to get an owned copy
         let rollout = rollouts
@@ -34,24 +34,23 @@ impl FeatureFlag {
         // Closure to retrieve experiment from HashMap
         let get_experiment = |value: &mut JsonValue| -> Result<Experiment> {
             // Take the experiment ID from the JSON
-            let experiment_id = value
-                .take_string()
-                .ok_or(DatafileError::MissingExperimentId)?;
+            let value = value.take();
+            let experiment_id = value.as_str().ok_or(DatafileError::MissingExperimentId)?;
 
             // Remove from hashmap to get an owned copy
+            // TODO: look for experiment id in either `groups` of `experiments`
             let experiment = experiments
-                .remove(&experiment_id)
-                // TODO: look for experiment id in either `groups` of `experiments`
+                .remove(experiment_id)
                 .unwrap_or(Experiment::default());
 
             Ok(experiment)
         };
 
         // TODO: handle bug where experiment ID can not be found
-        let experiments = list_field!(value, "experimentIds", get_experiment)?;
+        let experiments = list_field!(value, "experimentIds", get_experiment);
 
         let flag = FeatureFlag {
-            key,
+            key: key.to_owned(),
             rollout,
             experiments,
         };
