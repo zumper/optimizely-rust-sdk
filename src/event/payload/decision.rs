@@ -1,5 +1,5 @@
 // External imports
-use json::JsonValue;
+use serde_json::{json, Value as JsonValue};
 
 pub struct Decision {
     campaign_id: String,
@@ -19,11 +19,11 @@ impl Decision {
     }
 
     pub fn as_json(self) -> JsonValue {
-        json::object! {
+        json!({
             "campaign_id": self.campaign_id,
             "experiment_id": self.experiment_id,
             "variation_id": self.variation_id,
             "is_campaign_holdback": self.is_campaign_holdback,
-        }
+        })
     }
 }

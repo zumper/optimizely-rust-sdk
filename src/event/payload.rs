@@ -1,5 +1,5 @@
 // External imports
-use json::JsonValue;
+use serde_json::{json, Value as JsonValue};
 use std::collections::HashMap;
 
 // Relative imports of sub modules
@@ -64,21 +64,21 @@ impl Payload {
             .map(|(_, visitor)| visitor.as_json())
             .collect::<Vec<_>>();
 
-        json::object! {
+        json!({
             "account_id": self.account_id,
             "visitors": visitors,
             "enrich_decisions": true,
             "anonymize_ip": true,
             "client_name": CLIENT_NAME,
             "client_version": CLIENT_VERSION,
-        }
+        })
     }
 
     pub fn send(self) {
         log::debug!("Sending log payload to Optimizely");
 
         // Convert to JSON document and dump as String
-        let body = self.as_json().dump();
+        let body = self.as_json().to_string();
 
         // Make POST request
         match ureq::post(ENDPOINT_URL)

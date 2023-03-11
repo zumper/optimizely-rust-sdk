@@ -1,5 +1,5 @@
 // External imports
-use json::JsonValue;
+use serde_json::{json, Value as JsonValue};
 use std::time::SystemTime;
 use uuid::Uuid;
 
@@ -39,11 +39,11 @@ impl Event {
         // TODO: add these for custom events
         drop(self.event_key);
 
-        json::object! {
+        json!({
             "entity_id": self.entity_id,
             "type": self.event_type,
             "timestamp": self.timestamp,
             "uuid": self.uuid,
-        }
+        })
     }
 }

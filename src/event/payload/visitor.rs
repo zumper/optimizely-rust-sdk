@@ -1,5 +1,5 @@
 // External imports
-use json::JsonValue;
+use serde_json::{json, Value as JsonValue};
 
 // Imports from crate
 use crate::event::payload::{Decision, Event};
@@ -42,14 +42,14 @@ impl Visitor {
             .map(|event| event.as_json())
             .collect::<Vec<_>>();
 
-        let snapshot = json::object! {
+        let snapshot = json!({
             "decisions": decisions,
             "events": events,
-        };
+        });
 
-        json::object! {
+        json!({
             "visitor_id": self.visitor_id,
             "snapshots": [snapshot],
-        }
+        })
     }
 }
