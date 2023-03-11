@@ -1,5 +1,5 @@
 // External imports
-use anyhow::Result;
+use error_stack::{IntoReport, Report, Result};
 use serde_json::Value as JsonValue;
 use std::collections::HashMap;
 
@@ -21,7 +21,7 @@ impl FeatureFlag {
         value: &mut JsonValue,
         rollouts: &mut HashMap<String, Rollout>,
         experiments: &mut HashMap<String, Experiment>,
-    ) -> Result<FeatureFlag> {
+    ) -> Result<FeatureFlag, DatafileError> {
         let _id = string_field!(value, "id");
         let key = string_field!(value, "key");
         let rollout_id = string_field!(value, "rolloutId");
@@ -29,10 +29,10 @@ impl FeatureFlag {
         // Remove from hashmap to get an owned copy
         let rollout = rollouts
             .remove(&rollout_id)
-            .ok_or(DatafileError::InvalidRolloutId(rollout_id))?;
+            .ok_or(Report::new(DatafileError::InvalidRolloutId(rollout_id)))?;
 
         // Closure to retrieve experiment from HashMap
-        let get_experiment = |value: &mut JsonValue| -> Result<Experiment> {
+        let get_experiment = |value: &mut JsonValue| -> Result<Experiment, DatafileError> {
             // Take the experiment ID from the JSON
             let value = value.take();
             let experiment_id = value.as_str().ok_or(DatafileError::MissingExperimentId)?;

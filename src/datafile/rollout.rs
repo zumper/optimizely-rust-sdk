@@ -1,9 +1,9 @@
 // External imports
-use anyhow::Result;
+use error_stack::{IntoReport, Result};
 use serde_json::Value as JsonValue;
 
 // Imports from crate
-use crate::datafile::Experiment;
+use crate::datafile::{DatafileError, Experiment};
 
 #[derive(Debug)]
 pub struct Rollout {
@@ -12,7 +12,7 @@ pub struct Rollout {
 }
 
 impl Rollout {
-    pub fn build(value: &mut JsonValue) -> Result<Rollout> {
+    pub fn build(value: &mut JsonValue) -> Result<Rollout, DatafileError> {
         let id = string_field!(value, "id");
 
         let experiments = list_field!(value, "experiments", Experiment::build);

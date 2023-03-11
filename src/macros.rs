@@ -24,7 +24,8 @@ macro_rules! bool_field {
         $value[$name]
             .take()
             .as_bool()
-            .ok_or(missing_field!($name))?
+            .ok_or(missing_field!($name))
+            .into_report()?
     };
 }
 
@@ -33,7 +34,8 @@ macro_rules! u64_field {
         $value[$name]
             .take()
             .as_u64()
-            .ok_or(missing_field!($name))?
+            .ok_or(missing_field!($name))
+            .into_report()?
     };
 }
 
@@ -41,7 +43,10 @@ macro_rules! string_field {
     ($value: ident, $name: expr) => {
         {
             let owned_value = $value[$name].take();
-            owned_value.as_str().ok_or(missing_field!($name))?.to_owned()
+            owned_value.as_str()
+                .ok_or(missing_field!($name))
+                .into_report()?
+                .to_owned()
         }
     };
 }
@@ -51,10 +56,10 @@ macro_rules! list_field {
         $value[$name]
             .take()
             .as_array_mut()
-            .ok_or(missing_field!($name))?
+            .ok_or(missing_field!($name)).into_report()?
             .into_iter()
             .map($closure)
-            .collect::<anyhow::Result<Vec<_>>>()?
+            .collect::<error_stack::Result<Vec<_>, crate::datafile::DatafileError>>()?
     };
 }
 

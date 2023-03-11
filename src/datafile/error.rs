@@ -3,6 +3,8 @@ use thiserror::Error;
 
 #[derive(Error, Debug, PartialEq)]
 pub enum DatafileError {
+    #[error("The JSON could not be parsed")]
+    InvalidJson,
     #[error("Missing field in datafile: {0:?}")]
     MissingField(String),
     #[error("Revision is not parsable as integer")]

@@ -1,5 +1,5 @@
 // External imports
-use anyhow::Result;
+use error_stack::{IntoReport, Result, ResultExt};
 use std::fs::File;
 use std::io::Read;
 
@@ -21,7 +21,7 @@ impl ClientBuilder {
         }
     }
 
-    pub fn with_sdk_key(mut self, sdk_key: &str) -> Result<ClientBuilder> {
+    pub fn with_sdk_key(self, sdk_key: &str) -> Result<ClientBuilder, ClientError> {
         // Construct URL
         let url = format!("https://cdn.optimizely.com/datafiles/{}.json", sdk_key);
 
@@ -29,20 +29,20 @@ impl ClientBuilder {
         // TODO: implement polling mechanism
         let response = ureq::get(&url)
             .call()
-            .or_else(|_| Err(ClientError::FailedRequest))?;
+            .into_report()
+            .change_context(ClientError::FailedRequest)?;
 
         // Get response body
         let content = response
             .into_string()
-            .or_else(|_| Err(ClientError::FailedResponse))?;
+            .into_report()
+            .change_context(ClientError::FailedResponse)?;
 
         // Use response to build Client
-        self.datafile = Some(Datafile::build(content)?);
-
-        Ok(self)
+        self.with_datafile_as_string(content)
     }
 
-    pub fn with_local_datafile(mut self, file_path: &str) -> Result<ClientBuilder> {
+    pub fn with_local_datafile(self, file_path: &str) -> Result<ClientBuilder, ClientError> {
         // Read content from local path
         let mut content = String::new();
 
@@ -54,13 +54,15 @@ impl ClientBuilder {
             .or_else(|_| Err(ClientError::FailedFileRead))?;
 
         // Use file content to build Client
-        self.datafile = Some(Datafile::build(content)?);
-
-        Ok(self)
+        self.with_datafile_as_string(content)
     }
 
-    pub fn with_datafile_as_string(mut self, content: String) -> Result<ClientBuilder> {
-        self.datafile = Some(Datafile::build(content)?);
+    pub fn with_datafile_as_string(mut self, content: String) -> Result<ClientBuilder, ClientError> {
+        // Build datafile. If Result is an error report, change the context
+        let datafile = Datafile::build(content).change_context(ClientError::InvalidDatafile)?;
+
+        // Set the build option
+        self.datafile = Some(datafile);
         Ok(self)
     }
 
@@ -69,7 +71,7 @@ impl ClientBuilder {
         self
     }
 
-    pub fn build(self) -> Result<Client> {
+    pub fn build(self) -> Result<Client, ClientError> {
         let datafile = self.datafile.ok_or(ClientError::DatafileMissing)?;
         let event_dispatcher = self
             .event_dispatcher

@@ -13,4 +13,6 @@ pub enum ClientError {
     FailedFileOpen,
     #[error("Failed to read from local datafile")]
     FailedFileRead,
+    #[error("Invalid Datafile")]
+    InvalidDatafile,
 }

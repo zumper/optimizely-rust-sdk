@@ -1,9 +1,9 @@
 // External imports
-use anyhow::Result;
+use error_stack::{IntoReport, Result};
 use serde_json::Value as JsonValue;
 
 // Imports from crate
-use crate::datafile::{TrafficAllocation, Variation};
+use crate::datafile::{DatafileError, TrafficAllocation, Variation};
 
 /// Optimizely experiment
 #[derive(Debug)]
@@ -24,7 +24,7 @@ impl Default for Experiment {
 }
 
 impl Experiment {
-    pub fn build(value: &mut JsonValue) -> Result<Experiment> {
+    pub fn build(value: &mut JsonValue) -> Result<Experiment, DatafileError> {
         // Get fields as string
         let id = string_field!(value, "id");
         let _key = string_field!(value, "key");

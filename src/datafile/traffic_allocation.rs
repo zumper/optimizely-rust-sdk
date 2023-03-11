@@ -1,5 +1,5 @@
 // External imports
-use anyhow::Result;
+use error_stack::{IntoReport, Report, Result};
 use serde_json::Value as JsonValue;
 use std::collections::{BTreeMap, HashMap};
 use std::rc::Rc;
@@ -21,9 +21,12 @@ impl Default for TrafficAllocation {
 }
 
 impl TrafficAllocation {
-    pub fn build(value: &mut JsonValue, variations: &mut HashMap<String, Rc<Variation>>) -> Result<TrafficAllocation> {
+    pub fn build(
+        value: &mut JsonValue,
+        variations: &mut HashMap<String, Rc<Variation>>,
+    ) -> Result<TrafficAllocation, DatafileError> {
         // A closure to return pairs of Variation and their end of range
-        let get_allocation = |value: &mut JsonValue| -> Result<(u64, Rc<Variation>)> {
+        let get_allocation = |value: &mut JsonValue| -> Result<(u64, Rc<Variation>), DatafileError> {
             // Get id as string
             let variation_id = string_field!(value, "entityId");
 
@@ -33,7 +36,7 @@ impl TrafficAllocation {
             // Remove from hashmap to get an owned copy
             let variation = variations
                 .get(&variation_id)
-                .ok_or(DatafileError::InvalidVariationId(variation_id))?;
+                .ok_or(Report::new(DatafileError::InvalidVariationId(variation_id)))?;
 
             // NOTE: the datafile might contain the same variation multiple times in the traffic allocation
             // Hence we clone a reference-counting pointer

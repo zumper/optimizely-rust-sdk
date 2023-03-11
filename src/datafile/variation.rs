@@ -1,8 +1,11 @@
 // External imports
-use anyhow::Result;
+use error_stack::{IntoReport, Result};
 use serde_json::Value as JsonValue;
 use std::collections::HashMap;
 use std::rc::Rc;
+
+// Imports from crate
+use crate::datafile::DatafileError;
 
 /// A single variation like "off", "on" or other user-created variations.
 ///
@@ -55,7 +58,7 @@ impl Variation {
     /// assert_eq!(variation.key(), "on");
     /// assert_eq!(variation.is_feature_enabled(), true);
     /// ```
-    pub fn build(value: &mut JsonValue) -> Result<Variation> {
+    pub fn build(value: &mut JsonValue) -> Result<Variation, DatafileError> {
         let id = string_field!(value, "id");
         let key = string_field!(value, "key");
 

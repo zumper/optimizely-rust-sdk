@@ -1,7 +1,7 @@
 //! Everything related to parsing the Optimizely datafile
 
 // External imports
-use anyhow::Result;
+use error_stack::{IntoReport, Result, ResultExt};
 use std::collections::HashMap;
 use serde_json::Value as JsonValue;
 
@@ -28,9 +28,11 @@ pub struct Datafile {
 }
 
 impl Datafile {
-    pub(crate) fn build(content: String) -> Result<Datafile> {
+    pub(crate) fn build(content: String) -> Result<Datafile, DatafileError> {
         // Parse content as JSON
-        let mut value: JsonValue = serde_json::from_str(&content)?;
+        let mut value: JsonValue = serde_json::from_str(&content)
+            .into_report()
+            .change_context(DatafileError::InvalidJson)?;
 
         // Get account id as string
         let account_id = string_field!(value, "accountId");
@@ -38,7 +40,8 @@ impl Datafile {
         // Get revision as a string and parse to integer
         let revision = string_field!(value, "revision")
             .parse::<u32>()
-            .map_err(|_| DatafileError::InvalidRevision)?;
+            .into_report()
+            .change_context(DatafileError::InvalidRevision)?;
 
         // Get map of rollouts
         let rollouts: Vec<Rollout> = list_field!(value, "rollouts", Rollout::build);

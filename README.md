@@ -15,7 +15,7 @@ A list of the features that are currently included:
 - [x] Initialize client from SDK key
 - [ ] Periodically poll latest datafile
 - [x] Event dispatcher (synchronous)
-- [ ] Event dispatcher (batched)
+- [x] Event dispatcher (batched)
 - [ ] Logger
 - [ ] Notification listeners
 - [X] Decide option (DisableDecisionEvent)
