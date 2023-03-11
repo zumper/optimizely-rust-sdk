@@ -2,7 +2,7 @@
 #![allow(dead_code)]
 
 // Imports from this crate
-use optimizely::{Client, ClientBuilder, DecideOptions, Decision};
+use optimizely::{Client, ClientBuilder, DecideOptions};
 
 // This is the account ID of mark.biesheuvel@optimizely.com
 pub const ACCOUNT_ID: &str = "21537940595";
@@ -17,18 +17,18 @@ pub const FILE_PATH: &str = "examples/datafiles/sandbox.json";
 // This is the revision number of the bundled datafile
 pub const REVISION: u32 = 73;
 
-// Helper function create a fixed client
-pub fn get_client() -> Client {
-    ClientBuilder::new()
+pub(super) struct TestContext {
+    pub(super) client: Client,
+    pub(super) decide_options: DecideOptions,
+}
+
+pub(super) fn setup() -> TestContext {
+    // Build a client using default settings
+    let client = ClientBuilder::new()
         .with_local_datafile(FILE_PATH)
         .expect("local datafile should work")
         .build()
-        .expect("build should work")
-}
-
-pub fn get_decision<'a, 'b>(user_id: &'b str, flag_key: &'a str) -> Decision<'a> {
-    let client = get_client();
-    let user_context = client.create_user_context(user_id);
+        .expect("build should work");
 
     // Do not send any decision events during testing
     let decide_options = DecideOptions {
@@ -36,6 +36,5 @@ pub fn get_decision<'a, 'b>(user_id: &'b str, flag_key: &'a str) -> Decision<'a>
         ..DecideOptions::default()
     };
 
-    // Return decision result
-    user_context.decide_with_options(flag_key, &decide_options)
+    TestContext { client, decide_options }
 }

@@ -6,7 +6,7 @@ use crate::datafile::Datafile;
 use crate::event::EventDispatcher;
 
 // Relative imports of sub modules
-use error::ClientError;
+pub use error::ClientError;
 pub use builder::ClientBuilder;
 
 mod error;
