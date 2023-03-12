@@ -1,24 +1,19 @@
 // External imports
-use std::rc::Rc;
 use std::sync::mpsc;
 use std::thread;
 
-// Imports from crate
-use crate::datafile::{Experiment, Variation};
-use crate::event::EventDispatcher;
-use crate::UserContext;
+// Imports from super
+use crate::event::{Event, EventDispatcher};
 
 // Relative imports of sub modules
 use payload::BatchedPayload;
-use thread_message::ThreadMessage;
 
 mod payload;
-mod thread_message;
 
 // https://users.rust-lang.org/t/spawn-threads-and-join-in-destructor/1613/9
 pub struct BatchedEventDispatcher {
     thread_handle: Option<thread::JoinHandle<()>>,
-    transmitter: Option<mpsc::Sender<ThreadMessage>>,
+    transmitter: Option<mpsc::Sender<Event>>,
 }
 
 impl BatchedEventDispatcher {
@@ -29,12 +24,18 @@ impl BatchedEventDispatcher {
             let mut batched_payload = BatchedPayload::new();
 
             // Keep receiving new message from the main thread
-            for message in receiver.iter() {
-                match message {
-                    ThreadMessage::Decision(account_id, visitor_id, campaign_id, experiment_id, variation_id) => {
-                        batched_payload.add_decision(account_id, visitor_id, campaign_id, experiment_id, variation_id);
+            for event in receiver.iter() {
+                match event {
+                    Event::Decision {
+                        account_id,
+                        user_id,
+                        campaign_id,
+                        experiment_id,
+                        variation_id,
+                    } => {
+                        batched_payload.add_decision(account_id, user_id, campaign_id, experiment_id, variation_id);
                     }
-                    ThreadMessage::Conversion() => {
+                    _ => {
                         // TODO
                     }
                 }
@@ -77,19 +78,10 @@ impl Drop for BatchedEventDispatcher {
 }
 
 impl EventDispatcher for BatchedEventDispatcher {
-    fn send_decision(&self, user_context: &UserContext, experiment: &Experiment, variation: Rc<Variation>) {
-        // Build thread message by cloning all the Strings
-        let message = ThreadMessage::Decision(
-            user_context.client().account_id().to_owned(),
-            user_context.user_id().to_owned(),
-            experiment.campaign_id().to_owned(),
-            experiment.id().to_owned(),
-            variation.id().to_owned(),
-        );
-
-        // Send message to thread
+    fn send_event(&self, event: Event) {
+        // Send event to thread
         match &self.transmitter {
-            Some(tx) => match tx.send(message) {
+            Some(tx) => match tx.send(event) {
                 Ok(_) => {}
                 Err(_) => {}
             },

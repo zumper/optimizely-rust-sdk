@@ -1,7 +1,7 @@
-//! Everything related to make web requests to Optimizely
+//! Entrypoint of the SDK
 
 // Imports from crate
-use crate::UserContext;
+use crate::user_context::UserContext;
 use crate::datafile::Datafile;
 use crate::event::EventDispatcher;
 

@@ -1,5 +1,5 @@
-// Imports from this crate
-use optimizely::{ClientBuilder, ClientError, DatafileError};
+// Imports from Optimizely crate
+use optimizely::{client::ClientError, datafile::DatafileError, ClientBuilder};
 
 // Relative imports of sub modules
 use common::{ACCOUNT_ID, FILE_PATH, REVISION, SDK_KEY};

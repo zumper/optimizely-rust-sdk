@@ -1,5 +1,5 @@
 docs:
-  cargo doc
+  cargo doc -p optimizely --no-deps
 
 test:
   cargo test -- --nocapture

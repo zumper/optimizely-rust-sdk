@@ -1,4 +1,4 @@
-//! Everything related to parsing the Optimizely datafile
+//! Parsing the Optimizely datafile
 
 // External imports
 use error_stack::{IntoReport, Result, ResultExt};
@@ -6,11 +6,11 @@ use std::collections::HashMap;
 
 // Relative imports of sub modules
 pub use error::DatafileError;
-pub use experiment::Experiment;
-pub use feature_flag::FeatureFlag;
-pub use rollout::Rollout;
-pub use traffic_allocation::TrafficAllocation;
-pub use variation::Variation;
+pub(crate) use experiment::Experiment;
+pub(crate) use feature_flag::FeatureFlag;
+pub(crate) use rollout::Rollout;
+pub(crate) use traffic_allocation::TrafficAllocation;
+pub(crate) use variation::Variation;
 pub(crate) use json::Json;
 
 mod error;
@@ -22,7 +22,7 @@ mod variation;
 mod json;
 
 #[derive(Debug)]
-pub struct Datafile {
+pub(crate) struct Datafile {
     account_id: String,
     revision: u32,
     feature_flags: HashMap<String, FeatureFlag>,

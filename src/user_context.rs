@@ -1,3 +1,5 @@
+//! User content (move to client module?)
+
 // External imports
 use fasthash::murmur3::hash32_with_seed as murmur3_hash;
 use std::collections::HashMap;
@@ -5,7 +7,9 @@ use std::rc::Rc;
 
 // Imports from crate
 use crate::datafile::{Experiment, FeatureFlag, Variation};
-use crate::{Client, DecideOptions, Decision};
+use crate::event::Event;
+use crate::client::Client;
+use crate::decision::{DecideOptions, Decision};
 
 // Custom type alias
 pub type UserAttributes = HashMap<String, String>;
@@ -119,8 +123,8 @@ impl UserContext<'_> {
 
     fn get_variation_for_experiment(&self, experiment: &Experiment, send_decision: bool) -> Option<Rc<Variation>> {
         // Use references for the ids
-        let user_id = &self.user_id;
-        let experiment_id = &experiment.id();
+        let user_id = self.user_id();
+        let experiment_id = experiment.id();
 
         // Concatenate user id and experiment id
         let bucketing_key = format!("{user_id}{experiment_id}");
@@ -141,8 +145,13 @@ impl UserContext<'_> {
             Some(variation) => {
                 if send_decision {
                     // Send out a decision event as a side effect
+                    let account_id = self.client().account_id();
+                    let campaign_id = experiment.campaign_id();
+                    let variation_id = variation.id();
+                    let event = Event::decision(account_id, user_id, campaign_id, experiment_id, variation_id);
+
                     // Ignore result of the send_decision function
-                    self.client.event_dispatcher().send_decision(self, experiment, Rc::clone(&variation));
+                    self.client.event_dispatcher().send_event(event);
                 }
                 Some(variation)
             }
@@ -151,11 +160,12 @@ impl UserContext<'_> {
     }
 }
 
+/// Macro to create UserAttributes
 #[macro_export]
 macro_rules! user_attributes {
     { $( $key: expr => $value: expr),* $(,)?} => {
         {
-            let mut attribute = optimizely::UserAttributes::new();
+            let mut attribute = UserAttributes::new();
 
             $(
                 attribute.insert($key.to_owned(), $value.to_owned());

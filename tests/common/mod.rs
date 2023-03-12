@@ -1,8 +1,8 @@
 // Incorrect warnings of dead code: https://github.com/rust-lang/rust/issues/46379
 #![allow(dead_code)]
 
-// Imports from this crate
-use optimizely::{Client, ClientBuilder, DecideOptions};
+// Imports from Optimizely crate
+use optimizely::{client::Client, decision::DecideOptions, ClientBuilder};
 
 // This is the account ID of mark.biesheuvel@optimizely.com
 pub const ACCOUNT_ID: &str = "21537940595";

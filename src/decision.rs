@@ -1,3 +1,5 @@
+//! Result of a feature flag
+
 // Relative imports of sub modules
 pub use decide_options::DecideOptions;
 mod decide_options;

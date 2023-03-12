@@ -1,10 +1,5 @@
-// External imports
-use std::rc::Rc;
-
-// Imports from crate
-use crate::datafile::{Experiment, Variation};
-use crate::event::{EventDispatcher, Payload};
-use crate::UserContext;
+// Imports from super
+use super::{Event, EventDispatcher, Payload};
 
 pub struct SimpleEventDispatcher {}
 
@@ -15,18 +10,27 @@ impl SimpleEventDispatcher {
 }
 
 impl EventDispatcher for SimpleEventDispatcher {
-    fn send_decision(&self, user_context: &UserContext, experiment: &Experiment, variation: Rc<Variation>) {
-        // Generate a payload for a single decision event
-        let mut payload = Payload::new(user_context.client().account_id().to_owned());
+    fn send_event(&self, event: Event) {
+        match event {
+            Event::Decision {
+                account_id,
+                user_id,
+                campaign_id,
+                experiment_id,
+                variation_id,
+            } => {
+                // Generate a new payload
+                let mut payload = Payload::new(account_id);
 
-        // Add single decision
-        payload.add_decision(
-            user_context.user_id().to_owned(),
-            experiment.campaign_id().to_owned(),
-            experiment.id().to_owned(),
-            variation.id().to_owned(),
-        );
+                // Add single decision
+                payload.add_decision(user_id, campaign_id, experiment_id, variation_id);
 
-        payload.send();
+                // And send
+                payload.send();
+            }
+            _ => {
+                // TODO:
+            }
+        }
     }
 }
