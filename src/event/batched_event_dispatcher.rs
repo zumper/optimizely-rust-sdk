@@ -10,13 +10,22 @@ use payload::BatchedPayload;
 
 mod payload;
 
-// https://users.rust-lang.org/t/spawn-threads-and-join-in-destructor/1613/9
+/// An implementation of the EventDisptacher trait that collects multiple events before sending them
+///
+/// Inspiration from [Spawn threads and join in destructor](https://users.rust-lang.org/t/spawn-threads-and-join-in-destructor/1613/9)
 pub struct BatchedEventDispatcher {
     thread_handle: Option<thread::JoinHandle<()>>,
     transmitter: Option<mpsc::Sender<Event>>,
 }
 
 impl BatchedEventDispatcher {
+    /// Constructor for a new batched event dispatcher
+    ///
+    /// ```
+    /// use optimizely::event::BatchedEventDispatcher;
+    ///
+    /// let dispatcher = BatchedEventDispatcher::new();
+    /// ```
     pub fn new() -> BatchedEventDispatcher {
         let (transmitter, receiver) = mpsc::channel();
 

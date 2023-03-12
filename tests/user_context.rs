@@ -1,6 +1,6 @@
 // Imports from Optimizely crate
-use optimizely::user_attributes;
 use optimizely::client::UserAttributes;
+use optimizely::user_attributes;
 
 // Relative imports of sub modules
 use common::setup;

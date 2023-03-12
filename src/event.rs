@@ -11,10 +11,14 @@ mod trait_event_dispatcher;
 mod payload;
 mod batched_event_dispatcher;
 
-// When sending an event it can either be a decision event or conversion event
-// TODO: implement conversion event
+/// Representation of the events that can be dispatched to logx.optimizely.com.
+///
+/// An event can either be a decision or conversion.
 #[allow(dead_code)]
+#[derive(Debug)]
 pub enum Event {
+
+    #[doc(hidden)]
     Decision{
         account_id: String,
         user_id: String,
@@ -22,6 +26,8 @@ pub enum Event {
         experiment_id: String,
         variation_id: String,
     },
+
+    #[doc(hidden)]
     Conversion{
         account_id: String,
         user_id: String,
@@ -29,6 +35,20 @@ pub enum Event {
 }
 
 impl Event {
+
+    /// Constructor for a new decision event
+    ///
+    /// ```
+    /// use optimizely::event::{Event, SimpleEventDispatcher, EventDispatcher};
+    ///
+    /// let account_id = "21537940595";
+    /// let user_id = "user0";
+    /// let campaign_id = "9300000133039";
+    /// let experiment_id = "9300000169122";
+    /// let variation_id = "87757";
+    /// let event = Event::decision(account_id, user_id, campaign_id, experiment_id, variation_id);
+    /// SimpleEventDispatcher::new().send_event(event);
+    /// ```
     pub fn decision(account_id: &str, user_id: &str, campaign_id: &str, experiment_id: &str, variation_id: &str) -> Event {
         Event::Decision {
             account_id: account_id.to_owned(),

@@ -5,8 +5,8 @@ use std::rc::Rc;
 
 // Imports from crate
 use crate::datafile::{Experiment, FeatureFlag, Variation};
-use crate::event::Event;
 use crate::decision::{DecideOptions, Decision};
+use crate::event::Event;
 
 // Imports from super
 use super::Client;
@@ -30,8 +30,7 @@ pub struct UserContext<'a> {
 }
 
 impl UserContext<'_> {
-    /// Create a new user context
-    pub fn new<'a>(client: &'a Client, user_id: &'a str) -> UserContext<'a> {
+    pub(crate) fn new<'a>(client: &'a Client, user_id: &'a str) -> UserContext<'a> {
         // Create an empty set of user attributes
         let attributes = UserAttributes::new();
 
@@ -71,6 +70,15 @@ impl UserContext<'_> {
     }
 
     /// Decide which variation to show to a user
+    ///
+    /// ```
+    /// # let optimizely_client = optimizely::doctest_client()?;
+    /// #
+    /// let user_context = optimizely_client.create_user_context("123abc789xyz");
+    ///
+    /// let decision = user_context.decide("buy_button");
+    /// # Ok::<(), error_stack::Report<optimizely::client::ClientError>>(())
+    /// ```
     pub fn decide<'a, 'b>(&'a self, flag_key: &'b str) -> Decision<'b> {
         let options = DecideOptions::default();
         self.decide_with_options(flag_key, &options)
