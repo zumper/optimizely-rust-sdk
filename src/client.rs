@@ -1,16 +1,17 @@
 //! Entrypoint of the SDK
 
 // Imports from crate
-use crate::user_context::UserContext;
 use crate::datafile::Datafile;
 use crate::event::EventDispatcher;
 
 // Relative imports of sub modules
+pub use user::{UserContext, UserAttributes};
 pub use error::ClientError;
 pub use builder::ClientBuilder;
 
 mod error;
 mod builder;
+mod user;
 
 pub struct Client {
     datafile: Datafile,

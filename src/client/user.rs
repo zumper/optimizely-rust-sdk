@@ -1,5 +1,3 @@
-//! User content (move to client module?)
-
 // External imports
 use fasthash::murmur3::hash32_with_seed as murmur3_hash;
 use std::collections::HashMap;
@@ -8,18 +6,23 @@ use std::rc::Rc;
 // Imports from crate
 use crate::datafile::{Experiment, FeatureFlag, Variation};
 use crate::event::Event;
-use crate::client::Client;
 use crate::decision::{DecideOptions, Decision};
 
-// Custom type alias
+// Imports from super
+use super::Client;
+
+/// Custom type alias for user attributes
 pub type UserAttributes = HashMap<String, String>;
 
-// Constant used for the hashing algorithm
+/// Constant used for the hashing algorithm
 const HASH_SEED: u32 = 1;
 
-// Ranges are specified between 0 and 10_000
+/// Ranges are specified between 0 and 10_000
 const MAX_OF_RANGE: f64 = 10_000 as f64;
 
+/// User specific context
+///
+/// Foo
 pub struct UserContext<'a> {
     client: &'a Client,
     user_id: &'a str,
@@ -27,6 +30,7 @@ pub struct UserContext<'a> {
 }
 
 impl UserContext<'_> {
+    /// Create a new user context
     pub fn new<'a>(client: &'a Client, user_id: &'a str) -> UserContext<'a> {
         // Create an empty set of user attributes
         let attributes = UserAttributes::new();
@@ -40,6 +44,7 @@ impl UserContext<'_> {
 
     // TODO: add pub fn new_with_attributes
 
+    /// Add a new attribute to a user context
     pub fn set_attribute(&mut self, key: &str, value: &str) {
         // Create owned copies of the key and value
         let key = key.to_owned();
@@ -49,27 +54,29 @@ impl UserContext<'_> {
         self.attributes.insert(key, value);
     }
 
-    /// Getter for `client` field
-    pub fn client(&self) -> &Client {
+    /// Get the parent client of a user context
+    pub(crate) fn client(&self) -> &Client {
         &self.client
     }
 
-    /// Getter for `user_id` field
+    /// Get the id of a user
     pub fn user_id(&self) -> &str {
         &self.user_id
     }
 
-    /// Getter for `attributes` field
+    /// Get all attributes of a user
     pub fn attributes(&self) -> &UserAttributes {
         // Return borrowed reference to attributes
         &self.attributes
     }
 
+    /// Decide which variation to show to a user
     pub fn decide<'a, 'b>(&'a self, flag_key: &'b str) -> Decision<'b> {
         let options = DecideOptions::default();
         self.decide_with_options(flag_key, &options)
     }
 
+    /// Decide which variation to show to a user
     pub fn decide_with_options<'a, 'b>(&'a self, flag_key: &'b str, options: &DecideOptions) -> Decision<'b> {
         // Retrieve Flag object
         let flag = match self.client.datafile().get_flag(flag_key) {

@@ -11,8 +11,8 @@
 //! // Initialize Optimizely client using SDK key
 //! let sdk_key = "KVpGWnzPGKvvQ8yeEWmJZ";
 //! let client = optimizely::ClientBuilder::new()
-//!     .with_sdk_key(sdk_key).unwrap()
-//!     .build().unwrap();
+//!     .with_sdk_key(sdk_key)?
+//!     .build()?;
 //! 
 //! // Create user context for current user
 //! let user_id = "123abc789xyz";
@@ -21,6 +21,7 @@
 //! // Get decision for the Buy Button feature flag
 //! let feature_flag = "buy_button";
 //! let decision = user_context.decide(feature_flag);
+//! # Ok::<(), error_stack::Report<optimizely::client::ClientError>>(())
 //! ```
 
 // Reimport/export of structs to make them available at top-level
@@ -30,5 +31,4 @@ pub use client::ClientBuilder;
 pub mod client;
 pub mod datafile;
 pub mod decision;
-pub mod user_context;
 pub mod event;
