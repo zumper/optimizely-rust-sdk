@@ -1,61 +1,53 @@
 // External imports
-use error_stack::{IntoReport, Report, Result};
-use serde_json::Value as JsonValue;
+use error_stack::{Report, Result};
 use std::collections::{BTreeMap, HashMap};
 use std::rc::Rc;
 
-// Imports from crate
-use crate::datafile::{DatafileError, Variation};
+// Imports from super
+use super::{DatafileError, Json, Variation};
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct TrafficAllocation {
     ranges: BTreeMap<u64, Rc<Variation>>,
 }
 
-impl Default for TrafficAllocation {
-    fn default() -> Self {
-        TrafficAllocation {
-            ranges: BTreeMap::default(),
-        }
-    }
-}
-
 impl TrafficAllocation {
-    pub fn build(
-        value: &mut JsonValue,
+    pub(crate) fn build(
+        json: &mut Json,
         variations: &mut HashMap<String, Rc<Variation>>,
     ) -> Result<TrafficAllocation, DatafileError> {
-        // A closure to return pairs of Variation and their end of range
-        let get_allocation = |value: &mut JsonValue| -> Result<(u64, Rc<Variation>), DatafileError> {
-            // Get id as string
-            let variation_id = string_field!(value, "entityId");
-
-            // Get end of range as integer
-            let end_of_range = u64_field!(value, "endOfRange");
-
-            // Remove from hashmap to get an owned copy
-            let variation = variations
-                .get(&variation_id)
-                .ok_or(Report::new(DatafileError::InvalidVariationId(variation_id)))?;
-
-            // NOTE: the datafile might contain the same variation multiple times in the traffic allocation
-            // Hence we clone a reference-counting pointer
-            let variation = Rc::clone(variation);
-
-            // Return as a tuple
-            Ok((end_of_range, variation))
-        };
-
         // Create a binary tree for efficient look ups
-        let ranges: Vec<(u64, Rc<Variation>)> = list_field!(value, "trafficAllocation", get_allocation);
-        let ranges: BTreeMap<u64, Rc<Variation>> = ranges.into_iter().collect();
+        let ranges = json
+            .get("trafficAllocation")?
+            .as_array()?
+            .map(|mut json| {
+                // Get variation_id as String
+                let variation_id = json.get("entityId")?.as_string()?;
+
+                // Get end_of_range as u64
+                let end_of_range = json.get("endOfRange")?.as_integer()?;
+
+                // Remove from hashmap to get an owned copy
+                let variation = variations
+                    .get(&variation_id)
+                    .ok_or_else(|| Report::new(DatafileError::InvalidVariationId(variation_id.into())))?;
+
+                // NOTE: the datafile might contain the same variation multiple times in the traffic allocation
+                // Hence we clone a reference-counting pointer
+                let variation = Rc::clone(variation);
+
+                // Return as a tuple
+                Ok((end_of_range, variation))
+            })
+            .collect::<Result<Vec<_>, _>>()?
+            .into_iter()
+            .collect::<BTreeMap<_, _>>();
 
         // Initialize struct and return result
-        let traffic_allocation = TrafficAllocation { ranges };
-        Ok(traffic_allocation)
+        Ok(TrafficAllocation { ranges })
     }
 
-    pub fn get_variation_for_bucket(&self, bucket_value: u64) -> Option<Rc<Variation>> {
+    pub(crate) fn get_variation_for_bucket(&self, bucket_value: u64) -> Option<Rc<Variation>> {
         // Use BTreeMap::range to find the variation in O(log(n))
         match self.ranges.range(bucket_value..).next() {
             None => None,

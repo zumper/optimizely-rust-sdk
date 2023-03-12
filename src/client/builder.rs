@@ -5,7 +5,7 @@ use std::io::Read;
 
 // Imports from crate
 use crate::client::{Client, ClientError};
-use crate::datafile::Datafile;
+use crate::datafile::{Datafile, Json};
 use crate::event::{EventDispatcher, SimpleEventDispatcher};
 
 pub struct ClientBuilder {
@@ -58,8 +58,11 @@ impl ClientBuilder {
     }
 
     pub fn with_datafile_as_string(mut self, content: String) -> Result<ClientBuilder, ClientError> {
-        // Build datafile. If Result is an error report, change the context
-        let datafile = Datafile::build(content).change_context(ClientError::InvalidDatafile)?;
+        // Parse content as JSON
+        let mut json = Json::build(content).change_context(ClientError::InvalidDatafile)?;
+
+        // Create datafile from JSON value
+        let datafile = Datafile::build(&mut json).change_context(ClientError::InvalidDatafile)?;
 
         // Set the build option
         self.datafile = Some(datafile);
@@ -72,7 +75,9 @@ impl ClientBuilder {
     }
 
     pub fn build(self) -> Result<Client, ClientError> {
+        // Retrieve content from build options
         let datafile = self.datafile.ok_or(ClientError::DatafileMissing)?;
+
         let event_dispatcher = self
             .event_dispatcher
             .unwrap_or_else(|| Box::new(SimpleEventDispatcher::new()));

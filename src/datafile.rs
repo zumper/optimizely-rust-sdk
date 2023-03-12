@@ -3,7 +3,6 @@
 // External imports
 use error_stack::{IntoReport, Result, ResultExt};
 use std::collections::HashMap;
-use serde_json::Value as JsonValue;
 
 // Relative imports of sub modules
 pub use error::DatafileError;
@@ -12,6 +11,7 @@ pub use feature_flag::FeatureFlag;
 pub use rollout::Rollout;
 pub use traffic_allocation::TrafficAllocation;
 pub use variation::Variation;
+pub(crate) use json::Json;
 
 mod error;
 mod experiment;
@@ -19,6 +19,7 @@ mod feature_flag;
 mod rollout;
 mod traffic_allocation;
 mod variation;
+mod json;
 
 #[derive(Debug)]
 pub struct Datafile {
@@ -28,33 +29,46 @@ pub struct Datafile {
 }
 
 impl Datafile {
-    pub(crate) fn build(content: String) -> Result<Datafile, DatafileError> {
-        // Parse content as JSON
-        let mut value: JsonValue = serde_json::from_str(&content)
+    pub(crate) fn build(json: &mut Json) -> Result<Datafile, DatafileError> {
+        // Get account_id as String
+        let account_id = json.get("accountId")?
+            .as_string()?;
+
+        // Get revision as String, ...
+        let revision = json.get("revision")?
+            .as_string()?;
+
+        // ... and parse as u32
+        let revision = revision.parse()
             .into_report()
-            .change_context(DatafileError::InvalidJson)?;
+            .change_context(DatafileError::InvalidRevision(revision))?;
 
-        // Get account id as string
-        let account_id = string_field!(value, "accountId");
+        // Get HashMap of Rollouts
+        let mut rollouts = json.get("rollouts")?
+            .as_array()?
+            .map(|mut json| Rollout::build(&mut json))
+            .collect::<Result<Vec<_>, _>>()?
+            .into_iter()
+            .map(|rollout| (rollout.id().to_owned(), rollout))
+            .collect::<HashMap<_, _>>();
 
-        // Get revision as a string and parse to integer
-        let revision = string_field!(value, "revision")
-            .parse::<u32>()
-            .into_report()
-            .change_context(DatafileError::InvalidRevision)?;
+        // Get HashMap of Experiments
+        let mut experiments = json.get("experiments")?
+            .as_array()?
+            .map(|mut json| Experiment::build(&mut json))
+            .collect::<Result<Vec<_>, _>>()?
+            .into_iter()
+            .map(|experiment| (experiment.id().to_owned(), experiment))
+            .collect::<HashMap<_, _>>();
 
-        // Get map of rollouts
-        let rollouts: Vec<Rollout> = list_field!(value, "rollouts", Rollout::build);
-        let mut rollouts: HashMap<String, Rollout> = list_to_map!(rollouts, Rollout::map_entry);
-
-        // Get map of experiments
-        let experiments: Vec<Experiment> = list_field!(value, "experiments", Experiment::build);
-        let mut experiments: HashMap<String, Experiment> = list_to_map!(experiments, Experiment::map_entry);
-
-        // Get map of feature flags
-        let build_flag_closure = |value| FeatureFlag::build(value, &mut rollouts, &mut experiments);
-        let feature_flags: Vec<FeatureFlag> = list_field!(value, "featureFlags", build_flag_closure);
-        let feature_flags: HashMap<String, FeatureFlag> = list_to_map!(feature_flags, FeatureFlag::map_entry);
+        // // Get Vec of feature flags
+        let feature_flags = json.get("featureFlags")?
+            .as_array()?
+            .map(|mut json| FeatureFlag::build(&mut json, &mut rollouts, &mut experiments))
+            .collect::<Result<Vec<_>, _>>()?
+            .into_iter()
+            .map(|flag| (flag.key().to_owned(), flag))
+            .collect::<HashMap<_, _>>();
 
         Ok(Datafile {
             account_id,
@@ -69,10 +83,6 @@ impl Datafile {
 
     pub fn revision(&self) -> u32 {
         self.revision
-    }
-
-    pub fn feature_flags(&self) -> Vec<&FeatureFlag> {
-        self.feature_flags.values().collect()
     }
 
     pub fn get_flag(&self, flag_key: &str) -> Option<&FeatureFlag> {

@@ -1,56 +1,47 @@
 // External imports
-use error_stack::{IntoReport, Result};
-use serde_json::Value as JsonValue;
+use error_stack::Result;
+use std::collections::HashMap;
+use std::rc::Rc;
 
-// Imports from crate
-use crate::datafile::{DatafileError, TrafficAllocation, Variation};
+// Imports from super
+use super::{DatafileError, Json, TrafficAllocation, Variation};
 
 /// Optimizely experiment
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Experiment {
     id: String,
     campaign_id: String,
     traffic_allocation: TrafficAllocation,
 }
 
-impl Default for Experiment {
-    fn default() -> Self {
-        Experiment {
-            id: "".to_owned(),
-            campaign_id: "".to_owned(),
-            traffic_allocation: TrafficAllocation::default(),
-        }
-    }
-}
-
 impl Experiment {
-    pub fn build(value: &mut JsonValue) -> Result<Experiment, DatafileError> {
+    pub(crate) fn build(json: &mut Json) -> Result<Experiment, DatafileError> {
         // Get fields as string
-        let id = string_field!(value, "id");
-        let _key = string_field!(value, "key");
-        let campaign_id = string_field!(value, "layerId");
-        let _status = string_field!(value, "status");
+        let id = json.get("id")?.as_string()?;
 
-        // TODO: handle different values for status
+        let campaign_id = json.get("layerId")?.as_string()?;
+
+        // TODO: retrieve key
+        // TODO: retrieve status and handle different values for status
 
         // Create map of all variation so they can be looked up within TrafficAllocation
-        let variations = list_field!(value, "variations", Variation::build);
-        let mut variations = Variation::list_to_map(variations);
+        let mut variations = json
+            .get("variations")?
+            .as_array()?
+            .map(|mut json| Variation::build(&mut json))
+            .collect::<Result<Vec<_>, _>>()?
+            .into_iter()
+            .map(|variation| (variation.id().to_owned(), Rc::new(variation)))
+            .collect::<HashMap<_, _>>();
 
         // Build TrafficAllocation struct
-        let traffic_allocation = TrafficAllocation::build(value, &mut variations)?;
+        let traffic_allocation = TrafficAllocation::build(json, &mut variations)?;
 
-        // Initialize struct and return result
-        let experiment = Experiment {
+        Ok(Experiment {
             id,
             campaign_id,
             traffic_allocation,
-        };
-        Ok(experiment)
-    }
-
-    pub fn map_entry(self) -> (String, Experiment) {
-        (self.id.clone(), self)
+        })
     }
 
     pub fn id(&self) -> &str {

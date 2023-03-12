@@ -12,7 +12,6 @@ pub use builder::ClientBuilder;
 mod error;
 mod builder;
 
-
 pub struct Client {
     datafile: Datafile,
     event_dispatcher: Box<dyn EventDispatcher>,

@@ -1,11 +1,8 @@
 // External imports
-use error_stack::{IntoReport, Result};
-use serde_json::Value as JsonValue;
-use std::collections::HashMap;
-use std::rc::Rc;
+use error_stack::Result;
 
-// Imports from crate
-use crate::datafile::DatafileError;
+// Imports from super
+use super::{DatafileError, Json};
 
 /// A single variation like "off", "on" or other user-created variations.
 ///
@@ -22,59 +19,23 @@ pub struct Variation {
 }
 
 impl Variation {
-    /// Create a new variation.
-    ///
-    /// # Examples
-    /// ```rust
-    /// use optimizely::datafile::Variation;
-    ///
-    /// let variation = Variation::new("58054".into(), "on".into(), true);
-    ///
-    /// assert_eq!(variation.key(), "on");
-    /// assert_eq!(variation.is_feature_enabled(), true);
-    /// ```
-    pub fn new(id: String, key: String, is_feature_enabled: bool) -> Variation {
-        Variation {
-            id,
-            key,
-            is_feature_enabled,
-        }
-    }
-
     /// Create a new variation from a JSON value.
-    ///
-    /// # Examples
-    /// ```rust
-    /// use optimizely::datafile::Variation;
-    ///
-    /// let mut value = serde_json::json!({
-    ///     "id": "58054",
-    ///     "key": "on",
-    ///     "featureEnabled": true,
-    /// });
-    ///
-    /// let variation = Variation::build(&mut value).unwrap();
-    ///
-    /// assert_eq!(variation.key(), "on");
-    /// assert_eq!(variation.is_feature_enabled(), true);
-    /// ```
-    pub fn build(value: &mut JsonValue) -> Result<Variation, DatafileError> {
-        let id = string_field!(value, "id");
-        let key = string_field!(value, "key");
+    pub(crate) fn build(json: &mut Json) -> Result<Variation, DatafileError> {
+        // Get variation_id as String
+        let id = json.get("id")?.as_string()?;
+
+        // Get variation_key as String
+        let key = json.get("key")?.as_string()?;
 
         // TODO: fix bug below again
         // BUG: Found an example datafile where this field is missing, therefore default to `false`
-        let is_feature_enabled = bool_field!(value, "featureEnabled");
+        let is_feature_enabled = json.get("featureEnabled")?.as_boolean()?;
 
-        Ok(Variation::new(id, key, is_feature_enabled))
-    }
-
-    /// Converts a list of variations to a HashMap
-    pub(crate) fn list_to_map(variations: Vec<Variation>) -> HashMap<String, Rc<Variation>> {
-        variations
-            .into_iter()
-            .map(|variation| (variation.id.to_owned(), Rc::new(variation)))
-            .collect()
+        Ok(Variation {
+            id,
+            key,
+            is_feature_enabled,
+        })
     }
 
     /// Getter for `id` field

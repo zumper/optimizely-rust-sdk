@@ -1,9 +1,8 @@
 // External imports
-use error_stack::{IntoReport, Result};
-use serde_json::Value as JsonValue;
+use error_stack::Result;
 
-// Imports from crate
-use crate::datafile::{DatafileError, Experiment};
+// Imports from super
+use super::{DatafileError, Experiment, Json};
 
 #[derive(Debug)]
 pub struct Rollout {
@@ -12,22 +11,23 @@ pub struct Rollout {
 }
 
 impl Rollout {
-    pub fn build(value: &mut JsonValue) -> Result<Rollout, DatafileError> {
-        let id = string_field!(value, "id");
+    pub(crate) fn build(json: &mut Json) -> Result<Rollout, DatafileError> {
+        let id = json.get("id")?.as_string()?;
 
-        let experiments = list_field!(value, "experiments", Experiment::build);
+        let experiments = json
+            .get("experiments")?
+            .as_array()?
+            .map(|mut json| Experiment::build(&mut json))
+            .collect::<Result<Vec<_>, _>>()?;
 
-        Ok(Rollout {
-            id: id.to_owned(),
-            experiments,
-        })
-    }
-
-    pub fn map_entry(self) -> (String, Rollout) {
-        (self.id.clone(), self)
+        Ok(Rollout { id, experiments })
     }
 
     pub fn experiments(&self) -> &Vec<Experiment> {
         &self.experiments
+    }
+
+    pub fn id(&self) -> &str {
+        &self.id
     }
 }

@@ -1,9 +1,5 @@
 //! Optimizely Feature Experimentation SDK
 
-// Macro module
-#[macro_use]
-mod macros;
-
 // Reimport/export of structs to make them available at top-level
 pub use client::{Client, ClientBuilder, ClientError};
 pub use decision::{DecideOptions, Decision};

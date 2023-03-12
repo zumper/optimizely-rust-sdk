@@ -1,5 +1,5 @@
 // Imports from this crate
-use optimizely::{DatafileError, ClientBuilder, ClientError};
+use optimizely::{ClientBuilder, ClientError, DatafileError};
 
 // Relative imports of sub modules
 use common::{ACCOUNT_ID, FILE_PATH, REVISION, SDK_KEY};
@@ -18,11 +18,17 @@ fn with_invalid_json() {
 
     // Verify the client error type
     let client_error = report.downcast_ref::<ClientError>().unwrap();
-    assert!(matches!(client_error, ClientError::InvalidDatafile));
+    assert!(
+        matches!(client_error, ClientError::InvalidDatafile),
+        "Report did not include ClientError::InvalidDatafile"
+    );
 
-    // Verify the datafile error type
+    // Verify the json error type
     let datafile_error = report.downcast_ref::<DatafileError>().unwrap();
-    assert!(matches!(datafile_error, DatafileError::InvalidJson));
+    assert!(
+        matches!(datafile_error, DatafileError::InvalidJson),
+        "Report did not include DatafileError::InvalidJson"
+    );
 }
 
 #[test]
@@ -30,8 +36,7 @@ fn with_missing_properties() {
     // Valid JSON, but missing properties
     let json = r#"
     {
-        "accountId": "21537940595",
-        "revision": "73"
+        "accountId": "21537940595"
     }"#;
 
     // Get error report
@@ -42,11 +47,17 @@ fn with_missing_properties() {
 
     // Verify the client error type
     let client_error = report.downcast_ref::<ClientError>().unwrap();
-    assert!(matches!(client_error, ClientError::InvalidDatafile));
+    assert!(
+        matches!(client_error, ClientError::InvalidDatafile),
+        "Report did not include ClientError::InvalidDatafile"
+    );
 
     // Verify the datafile error type
     let datafile_error = report.downcast_ref::<DatafileError>().unwrap();
-    assert!(matches!(datafile_error, DatafileError::MissingField(_)));
+    assert!(
+        matches!(datafile_error, DatafileError::KeyNotFound(_)),
+        "Report did not include DatafileError::KeyNotFound"
+    );
 }
 
 #[test]
@@ -69,18 +80,24 @@ fn with_invalid_array_propertie() {
 
     // Verify the client error type
     let client_error = report.downcast_ref::<ClientError>().unwrap();
-    assert!(matches!(client_error, ClientError::InvalidDatafile));
+    assert!(
+        matches!(client_error, ClientError::InvalidDatafile),
+        "Report did not include ClientError::InvalidDatafile"
+    );
 
     // Verify the datafile error type
     let datafile_error = report.downcast_ref::<DatafileError>().unwrap();
-    assert!(matches!(datafile_error, DatafileError::MissingField(_)));
+    assert!(
+        matches!(datafile_error, DatafileError::InvalidType(_)),
+        "Report did not include DatafileError::InvalidType"
+    );
 }
 
 #[test]
 fn with_sdk_key() {
     let client = ClientBuilder::new()
         .with_sdk_key(SDK_KEY)
-        .expect("sdk key shoudl work")
+        .expect("sdk key should work")
         .build()
         .expect("build should work");
 
