@@ -72,12 +72,15 @@ impl UserContext<'_> {
     /// Decide which variation to show to a user
     ///
     /// ```
-    /// # let optimizely_client = optimizely::doctest_client()?;
+    /// # use optimizely::ClientBuilder;
+    /// # let file_path = "examples/datafiles/sandbox.json";
+    /// # let optimizely_client = ClientBuilder::new()
+    /// #     .with_local_datafile(file_path).unwrap()
+    /// #     .build().unwrap();
     /// #
     /// let user_context = optimizely_client.create_user_context("123abc789xyz");
     ///
     /// let decision = user_context.decide("buy_button");
-    /// # Ok::<(), error_stack::Report<optimizely::client::ClientError>>(())
     /// ```
     pub fn decide<'a, 'b>(&'a self, flag_key: &'b str) -> Decision<'b> {
         let options = DecideOptions::default();

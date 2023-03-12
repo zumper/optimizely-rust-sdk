@@ -1,4 +1,4 @@
-//! Event logging to logx.ptimizely.com
+//! Event logging to Optimizely Event API
 
 // Relative imports of sub modules
 pub use simple_event_dispatcher::SimpleEventDispatcher;
@@ -11,7 +11,7 @@ mod trait_event_dispatcher;
 mod payload;
 mod batched_event_dispatcher;
 
-/// Representation of the events that can be dispatched to logx.optimizely.com.
+/// Representation of the events which can be dispatched to Optimizely Event API
 ///
 /// An event can either be a decision or conversion.
 #[allow(dead_code)]
@@ -39,7 +39,7 @@ impl Event {
     /// Constructor for a new decision event
     ///
     /// ```
-    /// use optimizely::event::{Event, SimpleEventDispatcher, EventDispatcher};
+    /// use optimizely::event::Event;
     ///
     /// let account_id = "21537940595";
     /// let user_id = "user0";
@@ -47,7 +47,6 @@ impl Event {
     /// let experiment_id = "9300000169122";
     /// let variation_id = "87757";
     /// let event = Event::decision(account_id, user_id, campaign_id, experiment_id, variation_id);
-    /// SimpleEventDispatcher::new().send_event(event);
     /// ```
     pub fn decision(account_id: &str, user_id: &str, campaign_id: &str, experiment_id: &str, variation_id: &str) -> Event {
         Event::Decision {

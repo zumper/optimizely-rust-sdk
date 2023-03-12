@@ -8,12 +8,27 @@ use crate::client::{Client, ClientError};
 use crate::datafile::{Datafile, Json};
 use crate::event::{EventDispatcher, SimpleEventDispatcher};
 
+/// Factory/builder pattern for the SDK client
+///
+/// ```
+/// use optimizely::ClientBuilder;
+/// use optimizely::event::BatchedEventDispatcher;
+///
+/// // Initialize Optimizely client using local datafile and custom event dispatcher
+/// let file_path = "examples/datafiles/sandbox.json";
+/// let event_dispatcher = BatchedEventDispatcher::new();
+/// let optimizely_client = ClientBuilder::new()
+///     .with_local_datafile(file_path).unwrap()
+///     .with_event_dispatcher(event_dispatcher)
+///     .build().unwrap();
+/// ```
 pub struct ClientBuilder {
     datafile: Option<Datafile>,
     event_dispatcher: Option<Box<dyn EventDispatcher>>,
 }
 
 impl ClientBuilder {
+    /// Constructor for a new client factory/builder
     pub fn new() -> ClientBuilder {
         ClientBuilder {
             datafile: None,
@@ -21,6 +36,7 @@ impl ClientBuilder {
         }
     }
 
+    /// Download the datafile from the CDN using an SDK key
     pub fn with_sdk_key(self, sdk_key: &str) -> Result<ClientBuilder, ClientError> {
         // Construct URL
         let url = format!("https://cdn.optimizely.com/datafiles/{}.json", sdk_key);
@@ -42,6 +58,7 @@ impl ClientBuilder {
         self.with_datafile_as_string(content)
     }
 
+    /// Read the datafile from the local filesystem
     pub fn with_local_datafile(self, file_path: &str) -> Result<ClientBuilder, ClientError> {
         // Read content from local path
         let mut content = String::new();
@@ -57,6 +74,7 @@ impl ClientBuilder {
         self.with_datafile_as_string(content)
     }
 
+    /// Use a string variable as the datafile
     pub fn with_datafile_as_string(mut self, content: String) -> Result<ClientBuilder, ClientError> {
         // Parse content as JSON
         let mut json = Json::build(content).change_context(ClientError::InvalidDatafile)?;
@@ -69,11 +87,13 @@ impl ClientBuilder {
         Ok(self)
     }
 
+    /// Use a custom event disptacher
     pub fn with_event_dispatcher(mut self, event_dispatcher: impl EventDispatcher + 'static) -> ClientBuilder {
         self.event_dispatcher = Some(Box::new(event_dispatcher));
         self
     }
 
+    /// Build the client
     pub fn build(self) -> Result<Client, ClientError> {
         // Retrieve content from build options
         let datafile = self.datafile.ok_or(ClientError::DatafileMissing)?;

@@ -4,21 +4,16 @@
 pub use decide_options::DecideOptions;
 mod decide_options;
 
-// Inspiration: https://docs.developers.optimizely.com/experimentation/v4.0.0-full-stack/docs/optimizelydecision-python
-
+/// Decision for a specfic user and feature flag
 #[derive(Debug)]
 pub struct Decision<'a> {
     flag_key: &'a str,
     enabled: bool,
-    // rule_key
     variation_key: String,
-    // variables
-    // user_context
-    // reasons
 }
 
 impl Decision<'_> {
-    pub fn new<'a>(flag_key: &'a str, enabled: bool, variation_key: String) -> Decision {
+    pub(crate) fn new<'a>(flag_key: &'a str, enabled: bool, variation_key: String) -> Decision {
         Decision {
             flag_key,
             enabled,
@@ -26,18 +21,21 @@ impl Decision<'_> {
         }
     }
 
-    pub fn off<'a>(flag_key: &'a str) -> Decision {
+    pub(crate) fn off<'a>(flag_key: &'a str) -> Decision {
         Decision::new(flag_key, false, String::from("off"))
     }
 
+    /// Get the flag key for which this decision was made
     pub fn flag_key(&self) -> &str {
         &self.flag_key
     }
 
+    /// Get whether the flag should be enabled or disable
     pub fn enabled(&self) -> bool {
         self.enabled
     }
 
+    /// Get the variation key that was decided
     pub fn variation_key(&self) -> &str {
         &self.variation_key
     }

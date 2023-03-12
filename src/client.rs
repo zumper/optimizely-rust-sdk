@@ -13,32 +13,35 @@ mod error;
 mod builder;
 mod user;
 
+/// SDK client to use Optimizely Feature Experimentation
 pub struct Client {
     datafile: Datafile,
     event_dispatcher: Box<dyn EventDispatcher>,
 }
 
 impl Client {
+
+    /// Create a new user context for a given user id
     pub fn create_user_context<'a>(&'a self, user_id: &'a str) -> UserContext {
         UserContext::new(self, user_id)
     }
 
-    /// Getter for `account_id` field of `datafile`
+    /// Get the current Optimizely account id
     pub fn account_id(&self) -> &str {
         self.datafile.account_id()
     }
 
-    /// Getter for `revision` field of `datafile`
+    /// Get the current revision of the datafile
     pub fn revision(&self) -> u32 {
         self.datafile.revision()
     }
 
-    /// Getter for `datafile` field
+    /// Get the datafile within the client
     pub(crate) fn datafile(&self) -> &Datafile {
         &self.datafile
     }
 
-    /// Getter for `event_dispatcher` field
+    /// Get the event dispatcher within the client
     pub(crate) fn event_dispatcher(&self) -> &Box<dyn EventDispatcher> {
         &self.event_dispatcher
     }

@@ -9,13 +9,3 @@ pub mod client;
 pub mod datafile;
 pub mod decision;
 pub mod event;
-
-/// Used in doctest
-pub fn doctest_client() -> error_stack::Result<client::Client, client::ClientError> {
-    let sdk_key = "KVpGWnzPGKvvQ8yeEWmJZ";
-    let client = ClientBuilder::new()
-        .with_sdk_key(sdk_key)?
-        .build()?;
-
-    Ok(client)
-}
