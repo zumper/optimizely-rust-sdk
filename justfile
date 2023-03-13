@@ -1,8 +1,14 @@
 docs:
   cargo doc -p optimizely --no-deps
 
+release-test:
+  cargo test --release
+
+quick-test:
+  cargo test --lib -- --nocapture
+
 test:
-  cargo test -- --nocapture
+  just release-test
   just docs
 
 fmt:

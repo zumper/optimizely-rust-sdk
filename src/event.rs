@@ -41,11 +41,14 @@ impl Event {
     /// ```
     /// use optimizely::event::Event;
     ///
+    /// // Create some example IDs
     /// let account_id = "21537940595";
     /// let user_id = "user0";
     /// let campaign_id = "9300000133039";
     /// let experiment_id = "9300000169122";
     /// let variation_id = "87757";
+    ///
+    /// // Create new event from above IDs
     /// let event = Event::decision(account_id, user_id, campaign_id, experiment_id, variation_id);
     /// ```
     pub fn decision(account_id: &str, user_id: &str, campaign_id: &str, experiment_id: &str, variation_id: &str) -> Event {

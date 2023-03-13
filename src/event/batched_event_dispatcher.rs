@@ -13,10 +13,31 @@ mod payload;
 /// Implementation of the EventDisptacher trait that collects multiple events before sending them
 ///
 /// ```
-/// use optimizely::event::BatchedEventDispatcher;
+/// use optimizely::event::{BatchedEventDispatcher, Event, EventDispatcher};
 ///
+/// // Create some example IDs
+/// let account_id = "21537940595";
+/// let user_ids = vec!["user0", "user1", "user2"];
+/// let campaign_id = "9300000133039";
+/// let experiment_id = "9300000169122";
+/// let variation_ids = vec!["87757", "87757", "87755"];
+///
+/// // Create events from above IDs
+/// let events = user_ids.iter()
+///     .zip(variation_ids.iter())
+///     .map(|(user_id, variation_id)| {
+///         Event::decision(account_id, user_id, campaign_id, experiment_id, variation_id)
+///     });
+///
+/// // Create batched event disptacher
 /// let dispatcher = BatchedEventDispatcher::new();
-/// // TODO: add example of two events being sent
+///
+/// // Send all events
+/// for event in events {
+///     dispatcher.send_event(event);
+/// }
+///
+/// // Note that only one request will be sent to the Event API
 /// ```
 ///
 /// Inspiration from [Spawn threads and join in destructor](https://users.rust-lang.org/t/spawn-threads-and-join-in-destructor/1613/9)

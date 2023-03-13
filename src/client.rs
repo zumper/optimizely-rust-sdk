@@ -14,6 +14,23 @@ mod builder;
 mod user;
 
 /// SDK client to use Optimizely Feature Experimentation
+///
+/// ```
+/// use optimizely::ClientBuilder;
+/// #
+/// # let file_path = "examples/datafiles/sandbox.json";
+/// # let user_id = "123abc789xyz";
+///
+/// // Initialize Optimizely client using local datafile
+/// let optimizely_client = ClientBuilder::new()
+///     .with_local_datafile(file_path).unwrap()
+///     .build().unwrap();
+///
+/// // Use methods of client struct
+/// let account_id = optimizely_client.account_id();
+/// let revision = optimizely_client.revision();
+/// let user_context = optimizely_client.create_user_context(user_id);
+/// ```
 pub struct Client {
     datafile: Datafile,
     event_dispatcher: Box<dyn EventDispatcher>,
