@@ -4,12 +4,14 @@
 pub use simple_event_dispatcher::SimpleEventDispatcher;
 pub use batched_event_dispatcher::BatchedEventDispatcher;
 pub use trait_event_dispatcher::EventDispatcher;
+pub use error::EventError;
 use payload::Payload;
 
 mod simple_event_dispatcher;
 mod trait_event_dispatcher;
 mod payload;
 mod batched_event_dispatcher;
+mod error;
 
 /// Representation of the events which can be dispatched to Optimizely Event API
 ///

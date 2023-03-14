@@ -1,6 +1,10 @@
 // External imports
+use error_stack::{IntoReport, Result, ResultExt};
 use serde_json::{json, Value as JsonValue};
 use std::collections::HashMap;
+
+// Imports from super
+use super::EventError;
 
 // Relative imports of sub modules
 use decision::Decision;
@@ -74,26 +78,19 @@ impl Payload {
         })
     }
 
-    pub fn send(self) {
+    pub fn send(self) -> Result<(), EventError>{
         log::debug!("Sending log payload to Optimizely");
 
         // Convert to JSON document and dump as String
         let body = self.as_json().to_string();
 
         // Make POST request
-        match ureq::post(ENDPOINT_URL)
+        ureq::post(ENDPOINT_URL)
             .set(CONTENT_TYPE_KEY, CONTENT_TYPE_VALUE)
             .send_string(&body)
-        {
-            Ok(_) => {
-                // TODO: process response
-                // TODO: include some data in log message
-                log::info!("Log payload succesfully sent to Optimizely");
-            }
-            Err(_) => {
-                // TODO: process error
-                log::error!("Error while sending log payload");
-            }
-        }
+            .into_report()
+            .change_context(EventError::FailedRequest)?;
+
+        Ok(())
     }
 }

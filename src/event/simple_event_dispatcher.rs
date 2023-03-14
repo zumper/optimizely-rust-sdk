@@ -33,7 +33,7 @@ impl SimpleEventDispatcher {
 
 impl EventDispatcher for SimpleEventDispatcher {
     fn send_event(&self, event: Event) {
-        match event {
+        let result = match event {
             Event::Decision {
                 account_id,
                 user_id,
@@ -48,11 +48,22 @@ impl EventDispatcher for SimpleEventDispatcher {
                 payload.add_decision(user_id, campaign_id, experiment_id, variation_id);
 
                 // And send
-                payload.send();
+                payload.send()
             }
             _ => {
-                // TODO:
+                // TODO: implement conversion event
+                Ok(())
             }
+        };
+
+        match result {
+            Ok(_) => {
+                log::info!("Succesfull request to Event API");
+            },
+            Err(report) => {
+                log::error!("Failed request to Event API");
+                log::error!("\n{report:?}");
+            },
         }
     }
 }
