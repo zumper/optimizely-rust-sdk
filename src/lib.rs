@@ -8,4 +8,6 @@ pub use client::ClientBuilder;
 pub mod client;
 pub mod datafile;
 pub mod decision;
+
+#[cfg(feature = "online")]
 pub mod event;

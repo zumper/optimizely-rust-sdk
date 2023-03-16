@@ -2,6 +2,8 @@
 
 // Imports from crate
 use crate::datafile::Datafile;
+
+#[cfg(feature = "online")]
 use crate::event::EventDispatcher;
 
 // Relative imports of sub modules
@@ -33,6 +35,7 @@ mod user;
 /// ```
 pub struct Client {
     datafile: Datafile,
+    #[cfg(feature = "online")]
     event_dispatcher: Box<dyn EventDispatcher>,
 }
 
@@ -59,6 +62,7 @@ impl Client {
     }
 
     /// Get the event dispatcher within the client
+    #[cfg(feature = "online")]
     pub(crate) fn event_dispatcher(&self) -> &Box<dyn EventDispatcher> {
         &self.event_dispatcher
     }

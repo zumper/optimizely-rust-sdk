@@ -1,11 +1,17 @@
+// Conditional external imports
+#[cfg(feature = "online")]
+use error_stack::IntoReport;
+
 // External imports
-use error_stack::{IntoReport, Result, ResultExt};
+use error_stack::{Result, ResultExt};
 use std::fs::File;
 use std::io::Read;
 
 // Imports from crate
 use crate::client::{Client, ClientError};
 use crate::datafile::{Datafile, Json};
+
+#[cfg(feature = "online")]
 use crate::event::{EventDispatcher, SimpleEventDispatcher};
 
 /// Factory/builder pattern for the SDK client
@@ -22,21 +28,21 @@ use crate::event::{EventDispatcher, SimpleEventDispatcher};
 ///     .with_event_dispatcher(event_dispatcher)
 ///     .build().unwrap();
 /// ```
+#[derive(Default)]
 pub struct ClientBuilder {
     datafile: Option<Datafile>,
+    #[cfg(feature = "online")]
     event_dispatcher: Option<Box<dyn EventDispatcher>>,
 }
 
 impl ClientBuilder {
     /// Constructor for a new client factory/builder
     pub fn new() -> ClientBuilder {
-        ClientBuilder {
-            datafile: None,
-            event_dispatcher: None,
-        }
+        ClientBuilder::default()
     }
 
     /// Download the datafile from the CDN using an SDK key
+    #[cfg(feature = "online")]
     pub fn with_sdk_key(self, sdk_key: &str) -> Result<ClientBuilder, ClientError> {
         // Construct URL
         let url = format!("https://cdn.optimizely.com/datafiles/{}.json", sdk_key);
@@ -87,7 +93,8 @@ impl ClientBuilder {
         Ok(self)
     }
 
-    /// Use a custom event disptacher
+    /// Use a custom event dispatcher
+    #[cfg(feature = "online")]
     pub fn with_event_dispatcher(mut self, event_dispatcher: impl EventDispatcher + 'static) -> ClientBuilder {
         self.event_dispatcher = Some(Box::new(event_dispatcher));
         self
@@ -98,12 +105,14 @@ impl ClientBuilder {
         // Retrieve content from build options
         let datafile = self.datafile.ok_or(ClientError::DatafileMissing)?;
 
+        #[cfg(feature = "online")]
         let event_dispatcher = self
             .event_dispatcher
             .unwrap_or_else(|| Box::new(SimpleEventDispatcher::new()));
 
         Ok(Client {
             datafile,
+            #[cfg(feature = "online")]
             event_dispatcher,
         })
     }

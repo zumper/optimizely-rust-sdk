@@ -8,10 +8,10 @@ pub use error::EventError;
 use payload::Payload;
 
 mod simple_event_dispatcher;
-mod trait_event_dispatcher;
-mod payload;
 mod batched_event_dispatcher;
+mod trait_event_dispatcher;
 mod error;
+mod payload;
 
 /// Representation of the events which can be dispatched to Optimizely Event API
 ///

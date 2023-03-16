@@ -1,4 +1,4 @@
-use optimizely::{ClientBuilder, DecideOptions};
+use optimizely::{ClientBuilder, decision::DecideOptions};
 use std::error::Error;
 
 const FILE_PATH: &str = "../datafiles/sandbox.json";

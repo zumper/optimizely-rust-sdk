@@ -4,6 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-optimizely = {path="../.."}
 env_logger = "0.10.0"
 log = "0.4.17"
+
+[dependencies.optimizely]
+path = "../.."
+features = ["online"]

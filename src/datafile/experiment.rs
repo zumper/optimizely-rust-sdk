@@ -48,6 +48,7 @@ impl Experiment {
         &self.id
     }
 
+    #[allow(dead_code)]
     pub fn campaign_id(&self) -> &str {
         &self.campaign_id
     }

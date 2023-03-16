@@ -2,10 +2,10 @@ docs:
   cargo doc -p optimizely --no-deps
 
 release-test:
-  cargo test --release
+  cargo test --all-features --release
 
 quick-test:
-  cargo test --lib -- --nocapture
+  cargo test --all-features --lib -- --nocapture
 
 test:
   just release-test

@@ -6,6 +6,8 @@ use std::rc::Rc;
 // Imports from crate
 use crate::datafile::{Experiment, FeatureFlag, Variation};
 use crate::decision::{DecideOptions, Decision};
+
+#[cfg(feature = "online")]
 use crate::event::Event;
 
 // Imports from super
@@ -54,6 +56,7 @@ impl UserContext<'_> {
     }
 
     /// Get the parent client of a user context
+    #[allow(dead_code)]
     pub(crate) fn client(&self) -> &Client {
         &self.client
     }
@@ -162,14 +165,17 @@ impl UserContext<'_> {
         match result {
             Some(variation) => {
                 if send_decision {
-                    // Send out a decision event as a side effect
-                    let account_id = self.client().account_id();
-                    let campaign_id = experiment.campaign_id();
-                    let variation_id = variation.id();
-                    let event = Event::decision(account_id, user_id, campaign_id, experiment_id, variation_id);
+                    #[cfg(feature = "online")]
+                    {
+                        // Send out a decision event as a side effect
+                        let account_id = self.client().account_id();
+                        let campaign_id = experiment.campaign_id();
+                        let variation_id = variation.id();
+                        let event = Event::decision(account_id, user_id, campaign_id, experiment_id, variation_id);
 
-                    // Ignore result of the send_decision function
-                    self.client.event_dispatcher().send_event(event);
+                        // Ignore result of the send_decision function
+                        self.client.event_dispatcher().send_event(event);
+                    }
                 }
                 Some(variation)
             }
