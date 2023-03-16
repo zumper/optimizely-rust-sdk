@@ -2,7 +2,7 @@
 use optimizely::{client::ClientError, datafile::DatafileError, ClientBuilder};
 
 // Relative imports of sub modules
-use common::{ACCOUNT_ID, FILE_PATH, REVISION, SDK_KEY};
+use common::{ACCOUNT_ID, FILE_PATH, REVISION};
 mod common;
 
 #[test]
@@ -94,9 +94,10 @@ fn with_invalid_array_propertie() {
 }
 
 #[test]
+#[cfg(feature = "online")]
 fn with_sdk_key() {
     let client = ClientBuilder::new()
-        .with_sdk_key(SDK_KEY)
+        .with_sdk_key(common::SDK_KEY)
         .expect("sdk key should work")
         .build()
         .expect("build should work");
