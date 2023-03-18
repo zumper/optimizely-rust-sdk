@@ -27,7 +27,7 @@ use std::default::Default;
 /// // Make decision but do not send any events
 /// let decision = user_context.decide_with_options(flag_key, &decide_options);
 /// ```
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct DecideOptions {
     /// Prevents the visitor from firing an impression while still being served the variation,
     /// which disables displaying results of the Decide method on the Optimizely application's Results page.
@@ -49,17 +49,4 @@ pub struct DecideOptions {
 
     /// Exclude flag variable values from the decision result. Use this option to minimize the returned decision by skipping large JSON variables.
     pub exclude_variables: bool,
-}
-
-impl Default for DecideOptions {
-    fn default() -> Self {
-        // By default, all options are false
-        DecideOptions {
-            disable_decision_event: false,
-            enabled_flags_only: false,
-            ignore_user_profile_service: false,
-            include_reasons: false,
-            exclude_variables: false,
-        }
-    }
 }

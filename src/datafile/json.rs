@@ -79,7 +79,7 @@ impl Json {
                 // Unable to read property as an array
                 Report::new(DatafileError::InvalidType(TYPE_ARRAY.into()))
             })?
-            .into_iter()
+            .iter_mut()
             .map(|value| {
                 // Extract the array item from the JSON, ...
                 let value = value.take();

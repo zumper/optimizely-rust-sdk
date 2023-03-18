@@ -15,7 +15,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     // Initiate client using SDK key and batched event dispatcher
     let client = ClientBuilder::new()
         .with_sdk_key(SDK_KEY)?
-        .with_event_dispatcher(BatchedEventDispatcher::new())
+        .with_event_dispatcher(BatchedEventDispatcher::default())
         .build()?;
     
     let flag_key = "buy_button";

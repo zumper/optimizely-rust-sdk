@@ -20,7 +20,7 @@ pub type UserAttributes = HashMap<String, String>;
 const HASH_SEED: u32 = 1;
 
 /// Ranges are specified between 0 and 10_000
-const MAX_OF_RANGE: f64 = 10_000 as f64;
+const MAX_OF_RANGE: f64 = 10_000_f64;
 
 /// User specific context
 ///
@@ -58,12 +58,12 @@ impl UserContext<'_> {
     /// Get the parent client of a user context
     #[allow(dead_code)]
     pub(crate) fn client(&self) -> &Client {
-        &self.client
+        self.client
     }
 
     /// Get the id of a user
     pub fn user_id(&self) -> &str {
-        &self.user_id
+        self.user_id
     }
 
     /// Get all attributes of a user
@@ -85,13 +85,13 @@ impl UserContext<'_> {
     ///
     /// let decision = user_context.decide("buy_button");
     /// ```
-    pub fn decide<'a, 'b>(&'a self, flag_key: &'b str) -> Decision<'b> {
+    pub fn decide<'b>(&self, flag_key: &'b str) -> Decision<'b> {
         let options = DecideOptions::default();
         self.decide_with_options(flag_key, &options)
     }
 
     /// Decide which variation to show to a user
-    pub fn decide_with_options<'a, 'b>(&'a self, flag_key: &'b str, options: &DecideOptions) -> Decision<'b> {
+    pub fn decide_with_options<'b>(&self, flag_key: &'b str, options: &DecideOptions) -> Decision<'b> {
         // Retrieve Flag object
         let flag = match self.client.datafile().get_flag(flag_key) {
             Some(flag) => flag,

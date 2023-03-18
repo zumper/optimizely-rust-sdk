@@ -18,7 +18,7 @@ impl Decision {
         }
     }
 
-    pub fn as_json(self) -> JsonValue {
+    pub fn into_json(self) -> JsonValue {
         json!({
             "campaign_id": self.campaign_id,
             "experiment_id": self.experiment_id,

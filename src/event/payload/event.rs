@@ -35,7 +35,7 @@ impl Event {
         }
     }
 
-    pub fn as_json(self) -> JsonValue {
+    pub fn into_json(self) -> JsonValue {
         // TODO: add these for custom events
         drop(self.event_key);
 

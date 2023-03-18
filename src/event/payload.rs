@@ -61,11 +61,11 @@ impl Payload {
         visitor.add_event(entity_id, String::from("campaign_activated"));
     }
 
-    pub fn as_json(self) -> JsonValue {
+    pub fn into_json(self) -> JsonValue {
         let visitors = self
             .visitors
-            .into_iter()
-            .map(|(_, visitor)| visitor.as_json())
+            .into_values()
+            .map(|visitor| visitor.into_json())
             .collect::<Vec<_>>();
 
         json!({
@@ -78,11 +78,9 @@ impl Payload {
         })
     }
 
-    pub fn send(self) -> Result<(), EventError>{
-        log::debug!("Sending log payload to Optimizely");
-
+    pub fn send(self) -> Result<(), EventError> {
         // Convert to JSON document and dump as String
-        let body = self.as_json().to_string();
+        let body = self.into_json().to_string();
 
         // Make POST request
         ureq::post(ENDPOINT_URL)

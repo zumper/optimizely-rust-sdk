@@ -13,7 +13,7 @@ pub struct Decision<'a> {
 }
 
 impl Decision<'_> {
-    pub(crate) fn new<'a>(flag_key: &'a str, enabled: bool, variation_key: String) -> Decision {
+    pub(crate) fn new(flag_key: &str, enabled: bool, variation_key: String) -> Decision {
         Decision {
             flag_key,
             enabled,
@@ -21,13 +21,13 @@ impl Decision<'_> {
         }
     }
 
-    pub(crate) fn off<'a>(flag_key: &'a str) -> Decision {
+    pub(crate) fn off(flag_key: &str) -> Decision {
         Decision::new(flag_key, false, String::from("off"))
     }
 
     /// Get the flag key for which this decision was made
     pub fn flag_key(&self) -> &str {
-        &self.flag_key
+        self.flag_key
     }
 
     /// Get whether the flag should be enabled or disable

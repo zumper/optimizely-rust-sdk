@@ -30,7 +30,7 @@ mod payload;
 ///     });
 ///
 /// // Create batched event disptacher
-/// let dispatcher = BatchedEventDispatcher::new();
+/// let dispatcher = BatchedEventDispatcher::default();
 ///
 /// // Send all events
 /// for event in events {
@@ -46,9 +46,9 @@ pub struct BatchedEventDispatcher {
     transmitter: Option<mpsc::Sender<Event>>,
 }
 
-impl BatchedEventDispatcher {
+impl Default for BatchedEventDispatcher {
     /// Constructor for a new batched event dispatcher
-    pub fn new() -> BatchedEventDispatcher {
+    fn default() -> BatchedEventDispatcher {
         let (transmitter, receiver) = mpsc::channel();
 
         let thread_handle = thread::spawn(move || {
@@ -67,7 +67,7 @@ impl BatchedEventDispatcher {
                         batched_payload.add_decision(account_id, user_id, campaign_id, experiment_id, variation_id);
                     }
                     _ => {
-                        // TODO
+                        log::error!("Not implemented yet");
                     }
                 }
             }
@@ -83,27 +83,17 @@ impl BatchedEventDispatcher {
 impl Drop for BatchedEventDispatcher {
     fn drop(&mut self) {
         // Take the transmitter_decision and replace it with None
-        match self.transmitter.take() {
-            Some(tx) => {
-                // Drop the transmitter first, so the receiver in the thread will eventually stop
-                drop(tx);
-            }
-            None => {
-                // No transmitter found
-            }
+        if let Some(tx) = self.transmitter.take() {
+            // Drop the transmitter first, so the receiver in the thread will eventually stop
+            drop(tx);
         }
 
         // Take the thread_handle and replace it with None
-        match self.thread_handle.take() {
-            Some(handle) => {
-                // Wait until the thread has send the last batch
-                let result = handle.join();
-                // Ignore result
-                drop(result);
-            }
-            None => {
-                // No thread found
-            }
+        if let Some(handle) = self.thread_handle.take() {
+            // Wait until the thread has send the last batch
+            let result = handle.join();
+            // Ignore result
+            drop(result);
         }
     }
 }
@@ -113,10 +103,16 @@ impl EventDispatcher for BatchedEventDispatcher {
         // Send event to thread
         match &self.transmitter {
             Some(tx) => match tx.send(event) {
-                Ok(_) => {}
-                Err(_) => {}
+                Ok(_) => {
+                    log::debug!("Successfully sent message to thread");
+                }
+                Err(_) => {
+                    log::error!("Failed to send message to thread");
+                }
             },
-            None => {}
+            None => {
+                log::error!("Transmitter already dropped");
+            }
         }
     }
 }

@@ -1,9 +1,5 @@
-// Conditional external imports
-#[cfg(feature = "online")]
-use error_stack::IntoReport;
-
 // External imports
-use error_stack::{Result, ResultExt};
+use error_stack::{IntoReport, Result, ResultExt};
 use std::fs::File;
 use std::io::Read;
 
@@ -22,7 +18,7 @@ use crate::event::{EventDispatcher, SimpleEventDispatcher};
 ///
 /// // Initialize Optimizely client using local datafile and custom event dispatcher
 /// let file_path = "examples/datafiles/sandbox.json";
-/// let event_dispatcher = BatchedEventDispatcher::new();
+/// let event_dispatcher = BatchedEventDispatcher::default();
 /// let optimizely_client = ClientBuilder::new()
 ///     .with_local_datafile(file_path).unwrap()
 ///     .with_event_dispatcher(event_dispatcher)
@@ -70,11 +66,14 @@ impl ClientBuilder {
         let mut content = String::new();
 
         // Open file
-        let mut file = File::open(file_path).or_else(|_| Err(ClientError::FailedFileOpen))?;
+        let mut file = File::open(file_path)
+            .into_report()
+            .change_context(ClientError::FailedFileOpen)?;
 
         // Read file content into String
         file.read_to_string(&mut content)
-            .or_else(|_| Err(ClientError::FailedFileRead))?;
+            .into_report()
+            .change_context(ClientError::FailedFileRead)?;
 
         // Use file content to build Client
         self.with_datafile_as_string(content)
@@ -108,7 +107,7 @@ impl ClientBuilder {
         #[cfg(feature = "online")]
         let event_dispatcher = self
             .event_dispatcher
-            .unwrap_or_else(|| Box::new(SimpleEventDispatcher::new()));
+            .unwrap_or_else(|| Box::new(SimpleEventDispatcher::default()));
 
         Ok(Client {
             datafile,

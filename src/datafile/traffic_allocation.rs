@@ -30,7 +30,7 @@ impl TrafficAllocation {
                 // Remove from hashmap to get an owned copy
                 let variation = variations
                     .get(&variation_id)
-                    .ok_or_else(|| Report::new(DatafileError::InvalidVariationId(variation_id.into())))?;
+                    .ok_or_else(|| Report::new(DatafileError::InvalidVariationId(variation_id)))?;
 
                 // NOTE: the datafile might contain the same variation multiple times in the traffic allocation
                 // Hence we clone a reference-counting pointer
@@ -49,12 +49,9 @@ impl TrafficAllocation {
 
     pub(crate) fn get_variation_for_bucket(&self, bucket_value: u64) -> Option<Rc<Variation>> {
         // Use BTreeMap::range to find the variation in O(log(n))
-        match self.ranges.range(bucket_value..).next() {
-            None => None,
-            Some((_, variation)) => {
-                // Unwrap the variation from the tuple and clone a reference-counting pointer
-                Some(Rc::clone(variation))
-            }
-        }
+        self.ranges
+            .range(bucket_value..)
+            .next()
+            .map(|(_, variation)| Rc::clone(variation))
     }
 }

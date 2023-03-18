@@ -62,17 +62,17 @@ impl BatchedPayload {
         match self.payload_option.take() {
             Some(payload) => {
                 // Sending payload
-                log::debug!("Sending log payload to Optimizely");
+                log::debug!("Sending log payload to Event API");
 
                 // Send payload to endpoint
                 match payload.send() {
                     Ok(_) => {
-                        log::info!("Succesfull request to Event API");
-                    },
+                        log::info!("Successfull request to Event API");
+                    }
                     Err(report) => {
                         log::error!("Failed request to Event API");
                         log::error!("\n{report:?}");
-                    },
+                    }
                 }
 
                 // Reset counter

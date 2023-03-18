@@ -17,22 +17,24 @@ use super::{Event, EventDispatcher, Payload};
 /// let event = Event::decision(account_id, user_id, campaign_id, experiment_id, variation_id);
 ///
 /// // Create simple event disptacher
-/// let dispatcher = SimpleEventDispatcher::new();
+/// let dispatcher = SimpleEventDispatcher::default();
 ///
 /// // Send single event
 /// dispatcher.send_event(event);
 /// ```
 pub struct SimpleEventDispatcher {}
 
-impl SimpleEventDispatcher {
+impl Default for SimpleEventDispatcher {
     /// Constructor for a new simple event dispatcher
-    pub fn new() -> SimpleEventDispatcher {
+    fn default() -> SimpleEventDispatcher {
         SimpleEventDispatcher {}
     }
 }
 
 impl EventDispatcher for SimpleEventDispatcher {
     fn send_event(&self, event: Event) {
+        log::debug!("Sending log payload to Event API");
+
         let result = match event {
             Event::Decision {
                 account_id,
@@ -59,11 +61,11 @@ impl EventDispatcher for SimpleEventDispatcher {
         match result {
             Ok(_) => {
                 log::info!("Succesfull request to Event API");
-            },
+            }
             Err(report) => {
                 log::error!("Failed request to Event API");
                 log::error!("\n{report:?}");
-            },
+            }
         }
     }
 }

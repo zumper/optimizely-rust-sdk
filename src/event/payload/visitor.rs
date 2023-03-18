@@ -29,17 +29,17 @@ impl Visitor {
         self.events.push(Event::new(entity_id, event_type));
     }
 
-    pub fn as_json(self) -> JsonValue {
+    pub fn into_json(self) -> JsonValue {
         let decisions = self
             .decisions
             .into_iter()
-            .map(|decision| decision.as_json())
+            .map(|decision| decision.into_json())
             .collect::<Vec<_>>();
 
         let events = self
             .events
             .into_iter()
-            .map(|event| event.as_json())
+            .map(|event| event.into_json())
             .collect::<Vec<_>>();
 
         let snapshot = json!({
