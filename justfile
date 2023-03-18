@@ -1,5 +1,5 @@
 docs:
-  cargo doc -p optimizely --no-deps
+  cargo doc -p optimizely --all-features --no-deps
 
 release-test:
   cargo test --all-features --release
