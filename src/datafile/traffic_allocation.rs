@@ -12,6 +12,10 @@ pub struct TrafficAllocation {
 }
 
 impl TrafficAllocation {
+    pub(crate) fn new(ranges: BTreeMap<u64, Rc<Variation>>) -> TrafficAllocation {
+        TrafficAllocation { ranges }
+    }
+
     pub(crate) fn build(
         json: &mut Json,
         variations: &mut HashMap<String, Rc<Variation>>,
@@ -44,14 +48,82 @@ impl TrafficAllocation {
             .collect::<BTreeMap<_, _>>();
 
         // Initialize struct and return result
-        Ok(TrafficAllocation { ranges })
+        Ok(TrafficAllocation::new(ranges))
     }
 
-    pub(crate) fn get_variation_for_bucket(&self, bucket_value: u64) -> Option<Rc<Variation>> {
+    pub(crate) fn get_variation_for_bucket(&self, bucket_value: u64) -> Option<&Variation> {
         // Use BTreeMap::range to find the variation in O(log(n))
         self.ranges
             .range(bucket_value..)
             .next()
-            .map(|(_, variation)| Rc::clone(variation))
+            .map(|(_, variation)| variation.as_ref())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn get_variation_for_bucket() {
+        let variation_a = Rc::new(Variation::new("A".into(), "A".into(), true));
+        let variation_b = Rc::new(Variation::new("B".into(), "B".into(), true));
+        let variation_c = Rc::new(Variation::new("C".into(), "C".into(), true));
+
+        let ranges = vec![
+            (3_333, Rc::clone(&variation_a)),
+            (6_666, Rc::clone(&variation_b)),
+            (10_000, Rc::clone(&variation_c)),
+        ]
+        .into_iter()
+        .collect();
+
+        let traffic_allocation = TrafficAllocation::new(ranges);
+
+        assert_eq!(
+            traffic_allocation.get_variation_for_bucket(0),
+            Some(variation_a.as_ref())
+        );
+        assert_eq!(
+            traffic_allocation.get_variation_for_bucket(1_000),
+            Some(variation_a.as_ref())
+        );
+        assert_eq!(
+            traffic_allocation.get_variation_for_bucket(2_000),
+            Some(variation_a.as_ref())
+        );
+        assert_eq!(
+            traffic_allocation.get_variation_for_bucket(3_000),
+            Some(variation_a.as_ref())
+        );
+        assert_eq!(
+            traffic_allocation.get_variation_for_bucket(4_000),
+            Some(variation_b.as_ref())
+        );
+        assert_eq!(
+            traffic_allocation.get_variation_for_bucket(5_000),
+            Some(variation_b.as_ref())
+        );
+        assert_eq!(
+            traffic_allocation.get_variation_for_bucket(6_000),
+            Some(variation_b.as_ref())
+        );
+        assert_eq!(
+            traffic_allocation.get_variation_for_bucket(7_000),
+            Some(variation_c.as_ref())
+        );
+        assert_eq!(
+            traffic_allocation.get_variation_for_bucket(8_000),
+            Some(variation_c.as_ref())
+        );
+        assert_eq!(
+            traffic_allocation.get_variation_for_bucket(9_000),
+            Some(variation_c.as_ref())
+        );
+        assert_eq!(
+            traffic_allocation.get_variation_for_bucket(10_000),
+            Some(variation_c.as_ref())
+        );
+        assert_eq!(traffic_allocation.get_variation_for_bucket(11_000), None);
     }
 }

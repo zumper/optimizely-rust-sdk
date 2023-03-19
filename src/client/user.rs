@@ -1,7 +1,6 @@
 // External imports
 use fasthash::murmur3::hash32_with_seed as murmur3_hash;
 use std::collections::HashMap;
-use std::rc::Rc;
 
 // Imports from crate
 use crate::datafile::{Experiment, FeatureFlag, Variation};
@@ -118,7 +117,7 @@ impl UserContext<'_> {
         }
     }
 
-    fn get_variation_for_flag(&self, flag: &FeatureFlag, send_decision: bool) -> Option<Rc<Variation>> {
+    fn get_variation_for_flag<'a>(&'a self, flag: &'a FeatureFlag, send_decision: bool) -> Option<&Variation> {
         // Find first Experiment for which this user qualifies
         let result = flag
             .experiments()
@@ -142,7 +141,11 @@ impl UserContext<'_> {
         }
     }
 
-    fn get_variation_for_experiment(&self, experiment: &Experiment, send_decision: bool) -> Option<Rc<Variation>> {
+    fn get_variation_for_experiment<'a>(
+        &'a self,
+        experiment: &'a Experiment,
+        send_decision: bool,
+    ) -> Option<&Variation> {
         // Use references for the ids
         let user_id = self.user_id();
         let experiment_id = experiment.id();

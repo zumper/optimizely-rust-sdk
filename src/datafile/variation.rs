@@ -11,7 +11,7 @@ use super::{DatafileError, Json};
 /// The `key` is a human-readable value.
 /// The value of `is_feature_enabled` is `false` for the "off" variation.
 /// All other variations will have `is_feature_enabled` is `true`.
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Variation {
     id: String,
     key: String,
@@ -19,6 +19,14 @@ pub struct Variation {
 }
 
 impl Variation {
+    pub(crate) fn new(id: String, key: String, is_feature_enabled: bool) -> Variation {
+        Variation {
+            id,
+            key,
+            is_feature_enabled,
+        }
+    }
+
     /// Create a new variation from a JSON value.
     pub(crate) fn build(json: &mut Json) -> Result<Variation, DatafileError> {
         // Get variation_id as String
@@ -31,11 +39,7 @@ impl Variation {
         // BUG: Found an example datafile where this field is missing, therefore default to `false`
         let is_feature_enabled = json.get("featureEnabled")?.as_boolean()?;
 
-        Ok(Variation {
-            id,
-            key,
-            is_feature_enabled,
-        })
+        Ok(Variation::new(id, key, is_feature_enabled))
     }
 
     /// Getter for `id` field
