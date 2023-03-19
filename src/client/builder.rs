@@ -107,7 +107,7 @@ impl ClientBuilder {
         #[cfg(feature = "online")]
         let event_dispatcher = self
             .event_dispatcher
-            .unwrap_or_else(|| Box::new(SimpleEventDispatcher::default()));
+            .unwrap_or_else(|| Box::<SimpleEventDispatcher>::default());
 
         Ok(Client {
             datafile,

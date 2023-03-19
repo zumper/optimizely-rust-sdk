@@ -10,7 +10,6 @@ env:
   CARGO_TERM_COLOR: always
 jobs:
   test:
-    name: Test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source
@@ -21,13 +20,22 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
+      - name: Use cache for Cargo
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
       - name: Run cargo test
         uses: actions-rs/cargo@v1
         with:
           command: test
           args: --all-features --release
   clippy:
-    name: Clippy
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source
