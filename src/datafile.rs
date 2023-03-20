@@ -8,18 +8,18 @@ use std::collections::HashMap;
 pub use error::DatafileError;
 pub(crate) use experiment::Experiment;
 pub(crate) use feature_flag::FeatureFlag;
+pub(crate) use json::Json;
 pub(crate) use rollout::Rollout;
 pub(crate) use traffic_allocation::TrafficAllocation;
 pub(crate) use variation::Variation;
-pub(crate) use json::Json;
 
 mod error;
 mod experiment;
 mod feature_flag;
+mod json;
 mod rollout;
 mod traffic_allocation;
 mod variation;
-mod json;
 
 #[derive(Debug)]
 pub(crate) struct Datafile {
@@ -31,20 +31,20 @@ pub(crate) struct Datafile {
 impl Datafile {
     pub(crate) fn build(json: &mut Json) -> Result<Datafile, DatafileError> {
         // Get account_id as String
-        let account_id = json.get("accountId")?
-            .as_string()?;
+        let account_id = json.get("accountId")?.as_string()?;
 
         // Get revision as String, ...
-        let revision = json.get("revision")?
-            .as_string()?;
+        let revision = json.get("revision")?.as_string()?;
 
         // ... and parse as u32
-        let revision = revision.parse()
+        let revision = revision
+            .parse()
             .into_report()
             .change_context(DatafileError::InvalidRevision(revision))?;
 
         // Get HashMap of Rollouts
-        let mut rollouts = json.get("rollouts")?
+        let mut rollouts = json
+            .get("rollouts")?
             .as_array()?
             .map(|mut json| Rollout::build(&mut json))
             .collect::<Result<Vec<_>, _>>()?
@@ -53,7 +53,8 @@ impl Datafile {
             .collect::<HashMap<_, _>>();
 
         // Get HashMap of Experiments
-        let mut experiments = json.get("experiments")?
+        let mut experiments = json
+            .get("experiments")?
             .as_array()?
             .map(|mut json| Experiment::build(&mut json))
             .collect::<Result<Vec<_>, _>>()?
@@ -62,7 +63,8 @@ impl Datafile {
             .collect::<HashMap<_, _>>();
 
         // // Get Vec of feature flags
-        let feature_flags = json.get("featureFlags")?
+        let feature_flags = json
+            .get("featureFlags")?
             .as_array()?
             .map(|mut json| FeatureFlag::build(&mut json, &mut rollouts, &mut experiments))
             .collect::<Result<Vec<_>, _>>()?

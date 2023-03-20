@@ -1,17 +1,17 @@
 //! Event logging to Optimizely Event API
 
 // Relative imports of sub modules
-pub use simple_event_dispatcher::SimpleEventDispatcher;
 pub use batched_event_dispatcher::BatchedEventDispatcher;
-pub use trait_event_dispatcher::EventDispatcher;
 pub use error::EventError;
 use payload::Payload;
+pub use simple_event_dispatcher::SimpleEventDispatcher;
+pub use trait_event_dispatcher::EventDispatcher;
 
-mod simple_event_dispatcher;
 mod batched_event_dispatcher;
-mod trait_event_dispatcher;
 mod error;
 mod payload;
+mod simple_event_dispatcher;
+mod trait_event_dispatcher;
 
 /// Representation of the events which can be dispatched to Optimizely Event API
 ///
@@ -19,9 +19,8 @@ mod payload;
 #[allow(dead_code)]
 #[derive(Debug)]
 pub enum Event {
-
     #[doc(hidden)]
-    Decision{
+    Decision {
         account_id: String,
         user_id: String,
         campaign_id: String,
@@ -30,14 +29,10 @@ pub enum Event {
     },
 
     #[doc(hidden)]
-    Conversion{
-        account_id: String,
-        user_id: String,
-    },
+    Conversion { account_id: String, user_id: String },
 }
 
 impl Event {
-
     /// Constructor for a new decision event
     ///
     /// ```
@@ -53,13 +48,15 @@ impl Event {
     /// // Create new event from above IDs
     /// let event = Event::decision(account_id, user_id, campaign_id, experiment_id, variation_id);
     /// ```
-    pub fn decision(account_id: &str, user_id: &str, campaign_id: &str, experiment_id: &str, variation_id: &str) -> Event {
+    pub fn decision<T: Into<String>>(
+        account_id: T, user_id: T, campaign_id: T, experiment_id: T, variation_id: T,
+    ) -> Event {
         Event::Decision {
-            account_id: account_id.to_owned(),
-            user_id: user_id.to_owned(),
-            campaign_id: campaign_id.to_owned(),
-            experiment_id: experiment_id.to_owned(),
-            variation_id: variation_id.to_owned(),
+            account_id: account_id.into(),
+            user_id: user_id.into(),
+            campaign_id: campaign_id.into(),
+            experiment_id: experiment_id.into(),
+            variation_id: variation_id.into(),
         }
     }
 }

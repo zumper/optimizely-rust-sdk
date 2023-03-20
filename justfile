@@ -12,4 +12,4 @@ test:
   just docs
 
 fmt:
-  rustfmt src/**/*.rs tests/*.rs
+  rustfmt **/*.rs

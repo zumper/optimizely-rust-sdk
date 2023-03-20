@@ -13,16 +13,16 @@ pub struct Decision<'a> {
 }
 
 impl Decision<'_> {
-    pub(crate) fn new(flag_key: &str, enabled: bool, variation_key: String) -> Decision {
+    pub(crate) fn new<T: Into<String>>(flag_key: &str, enabled: bool, variation_key: T) -> Decision {
         Decision {
             flag_key,
             enabled,
-            variation_key,
+            variation_key: variation_key.into(),
         }
     }
 
     pub(crate) fn off(flag_key: &str) -> Decision {
-        Decision::new(flag_key, false, String::from("off"))
+        Decision::new(flag_key, false, "off")
     }
 
     /// Get the flag key for which this decision was made

@@ -45,10 +45,10 @@ impl UserContext<'_> {
     // TODO: add pub fn new_with_attributes
 
     /// Add a new attribute to a user context
-    pub fn set_attribute(&mut self, key: &str, value: &str) {
+    pub fn set_attribute<T: Into<String>>(&mut self, key: T, value: T) {
         // Create owned copies of the key and value
-        let key = key.to_owned();
-        let value = value.to_owned();
+        let key = key.into();
+        let value = value.into();
 
         // Add the attribute
         self.attributes.insert(key, value);
@@ -108,7 +108,7 @@ impl UserContext<'_> {
         match self.get_variation_for_flag(flag, send_decision) {
             Some(variation) => {
                 // Unpack the variation and create Decision struct
-                Decision::new(flag_key, variation.is_feature_enabled(), variation.key().to_owned())
+                Decision::new(flag_key, variation.is_feature_enabled(), variation.key())
             }
             None => {
                 // No experiment or rollout found, or user does not qualify for any

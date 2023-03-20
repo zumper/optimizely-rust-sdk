@@ -7,12 +7,12 @@ use crate::datafile::Datafile;
 use crate::event::EventDispatcher;
 
 // Relative imports of sub modules
-pub use user::{UserContext, UserAttributes};
-pub use error::ClientError;
 pub use builder::ClientBuilder;
+pub use error::ClientError;
+pub use user::{UserAttributes, UserContext};
 
-mod error;
 mod builder;
+mod error;
 mod user;
 
 /// SDK client to use Optimizely Feature Experimentation
@@ -40,7 +40,6 @@ pub struct Client {
 }
 
 impl Client {
-
     /// Create a new user context for a given user id
     pub fn create_user_context<'a>(&'a self, user_id: &'a str) -> UserContext {
         UserContext::new(self, user_id)
