@@ -1,6 +1,7 @@
 // External imports
-use serde_json::{json, Value as JsonValue};
+use serde::Serialize;
 
+#[derive(Serialize)]
 pub struct Decision {
     campaign_id: String,
     experiment_id: String,
@@ -16,14 +17,5 @@ impl Decision {
             variation_id,
             is_campaign_holdback: false,
         }
-    }
-
-    pub fn into_json(self) -> JsonValue {
-        json!({
-            "campaign_id": self.campaign_id,
-            "experiment_id": self.experiment_id,
-            "variation_id": self.variation_id,
-            "is_campaign_holdback": self.is_campaign_holdback,
-        })
     }
 }

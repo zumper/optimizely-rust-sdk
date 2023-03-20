@@ -1,12 +1,14 @@
 // External imports
-use serde_json::{json, Value as JsonValue};
+use serde::Serialize;
 use std::time::SystemTime;
 use uuid::Uuid;
 
+#[derive(Serialize)]
 pub struct Event {
     uuid: String,
     timestamp: u64,
     entity_id: String,
+    #[serde(rename = "type")]
     event_type: String,
     event_key: Option<String>,
     // tags
@@ -33,17 +35,5 @@ impl Event {
             event_type,
             event_key: Option::None,
         }
-    }
-
-    pub fn into_json(self) -> JsonValue {
-        // TODO: add these for custom events
-        drop(self.event_key);
-
-        json!({
-            "entity_id": self.entity_id,
-            "type": self.event_type,
-            "timestamp": self.timestamp,
-            "uuid": self.uuid,
-        })
     }
 }

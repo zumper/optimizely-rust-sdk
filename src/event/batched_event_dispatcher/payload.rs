@@ -4,13 +4,13 @@ use crate::event::Payload;
 // Upper limit to number of events in a batch
 const DEFAULT_BATCH_THRESHOLD: u16 = 10;
 
-pub(super) struct BatchedPayload {
+pub(super) struct BatchedPayload<'a> {
     counter: u16,
-    payload_option: Option<Payload>,
+    payload_option: Option<Payload<'a>>,
 }
 
-impl BatchedPayload {
-    pub(super) fn new() -> BatchedPayload {
+impl BatchedPayload<'_> {
+    pub(super) fn new() -> BatchedPayload<'static> {
         let payload_option: Option<Payload> = None;
         let counter = 0;
 
@@ -82,7 +82,7 @@ impl BatchedPayload {
     }
 }
 
-impl Drop for BatchedPayload {
+impl Drop for BatchedPayload<'_> {
     fn drop(&mut self) {
         log::debug!("Dropping BatchedPayload");
 
