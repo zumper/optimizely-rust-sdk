@@ -12,7 +12,7 @@ fn with_invalid_json() {
 
     // Get error report
     let report = ClientBuilder::new()
-        .with_datafile_as_string(json.into())
+        .with_datafile_as_string(json)
         .err()
         .unwrap();
 
@@ -41,7 +41,7 @@ fn with_missing_properties() {
 
     // Get error report
     let report = ClientBuilder::new()
-        .with_datafile_as_string(json.into())
+        .with_datafile_as_string(json)
         .err()
         .unwrap();
 

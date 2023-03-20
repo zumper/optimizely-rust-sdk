@@ -21,11 +21,7 @@ impl BatchedPayload {
     }
 
     pub(super) fn add_decision(
-        &mut self,
-        account_id: String,
-        visitor_id: String,
-        campaign_id: String,
-        experiment_id: String,
+        &mut self, account_id: String, visitor_id: String, campaign_id: String, experiment_id: String,
         variation_id: String,
     ) {
         log::debug!("Adding decision event to log payload");

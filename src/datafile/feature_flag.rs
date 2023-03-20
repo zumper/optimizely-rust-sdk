@@ -25,9 +25,7 @@ impl FeatureFlag {
 
     /// Builds a feature flag from JSON datafile
     pub(crate) fn build(
-        json: &mut Json,
-        rollouts: &mut HashMap<String, Rollout>,
-        experiments: &mut HashMap<String, Experiment>,
+        json: &mut Json, rollouts: &mut HashMap<String, Rollout>, experiments: &mut HashMap<String, Experiment>,
     ) -> Result<FeatureFlag, DatafileError> {
         // Get key as String
         let key = json.get("key")?.as_string()?;

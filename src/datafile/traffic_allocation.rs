@@ -17,8 +17,7 @@ impl TrafficAllocation {
     }
 
     pub(crate) fn build(
-        json: &mut Json,
-        variations: &mut HashMap<String, Rc<Variation>>,
+        json: &mut Json, variations: &mut HashMap<String, Rc<Variation>>,
     ) -> Result<TrafficAllocation, DatafileError> {
         // Create a binary tree for efficient look ups
         let ranges = json
@@ -93,50 +92,17 @@ mod tests {
             10_000 => &variation_c,
         };
 
-        assert_eq!(
-            traffic_allocation.get_variation_for_bucket(0),
-            Some(variation_a.as_ref())
-        );
-        assert_eq!(
-            traffic_allocation.get_variation_for_bucket(1_000),
-            Some(variation_a.as_ref())
-        );
-        assert_eq!(
-            traffic_allocation.get_variation_for_bucket(2_000),
-            Some(variation_a.as_ref())
-        );
-        assert_eq!(
-            traffic_allocation.get_variation_for_bucket(3_000),
-            Some(variation_a.as_ref())
-        );
-        assert_eq!(
-            traffic_allocation.get_variation_for_bucket(4_000),
-            Some(variation_b.as_ref())
-        );
-        assert_eq!(
-            traffic_allocation.get_variation_for_bucket(5_000),
-            Some(variation_b.as_ref())
-        );
-        assert_eq!(
-            traffic_allocation.get_variation_for_bucket(6_000),
-            Some(variation_b.as_ref())
-        );
-        assert_eq!(
-            traffic_allocation.get_variation_for_bucket(7_000),
-            Some(variation_c.as_ref())
-        );
-        assert_eq!(
-            traffic_allocation.get_variation_for_bucket(8_000),
-            Some(variation_c.as_ref())
-        );
-        assert_eq!(
-            traffic_allocation.get_variation_for_bucket(9_000),
-            Some(variation_c.as_ref())
-        );
-        assert_eq!(
-            traffic_allocation.get_variation_for_bucket(10_000),
-            Some(variation_c.as_ref())
-        );
+        assert_eq!(traffic_allocation.get_variation_for_bucket(0), Some(variation_a.as_ref()));
+        assert_eq!(traffic_allocation.get_variation_for_bucket(1_000), Some(variation_a.as_ref()));
+        assert_eq!(traffic_allocation.get_variation_for_bucket(2_000), Some(variation_a.as_ref()));
+        assert_eq!(traffic_allocation.get_variation_for_bucket(3_000), Some(variation_a.as_ref()));
+        assert_eq!(traffic_allocation.get_variation_for_bucket(4_000), Some(variation_b.as_ref()));
+        assert_eq!(traffic_allocation.get_variation_for_bucket(5_000), Some(variation_b.as_ref()));
+        assert_eq!(traffic_allocation.get_variation_for_bucket(6_000), Some(variation_b.as_ref()));
+        assert_eq!(traffic_allocation.get_variation_for_bucket(7_000), Some(variation_c.as_ref()));
+        assert_eq!(traffic_allocation.get_variation_for_bucket(8_000), Some(variation_c.as_ref()));
+        assert_eq!(traffic_allocation.get_variation_for_bucket(9_000), Some(variation_c.as_ref()));
+        assert_eq!(traffic_allocation.get_variation_for_bucket(10_000), Some(variation_c.as_ref()));
         assert_eq!(traffic_allocation.get_variation_for_bucket(11_000), None);
         assert_eq!(traffic_allocation.get_variation_for_bucket(99_000), None);
     }

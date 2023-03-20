@@ -57,7 +57,7 @@ impl ClientBuilder {
             .change_context(ClientError::FailedResponse)?;
 
         // Use response to build Client
-        self.with_datafile_as_string(content)
+        self.with_datafile_as_string(&content)
     }
 
     /// Read the datafile from the local filesystem
@@ -76,11 +76,11 @@ impl ClientBuilder {
             .change_context(ClientError::FailedFileRead)?;
 
         // Use file content to build Client
-        self.with_datafile_as_string(content)
+        self.with_datafile_as_string(&content)
     }
 
     /// Use a string variable as the datafile
-    pub fn with_datafile_as_string(mut self, content: String) -> Result<ClientBuilder, ClientError> {
+    pub fn with_datafile_as_string(mut self, content: &str) -> Result<ClientBuilder, ClientError> {
         // Parse content as JSON
         let mut json = Json::build(content).change_context(ClientError::InvalidDatafile)?;
 

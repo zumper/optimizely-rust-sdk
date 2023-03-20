@@ -36,5 +36,8 @@ pub(super) fn setup() -> TestContext {
         ..DecideOptions::default()
     };
 
-    TestContext { client, decide_options }
+    TestContext {
+        client,
+        decide_options,
+    }
 }

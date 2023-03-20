@@ -37,11 +37,7 @@ impl Payload {
     }
 
     pub fn add_decision(
-        &mut self,
-        visitor_id: String,
-        campaign_id: String,
-        experiment_id: String,
-        variation_id: String,
+        &mut self, visitor_id: String, campaign_id: String, experiment_id: String, variation_id: String,
     ) {
         log::debug!("Adding decision event to log payload");
 

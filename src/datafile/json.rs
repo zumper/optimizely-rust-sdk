@@ -19,9 +19,9 @@ impl Json {
         Json { value }
     }
 
-    pub(crate) fn build(content: String) -> Result<Json, DatafileError> {
+    pub(crate) fn build(content: &str) -> Result<Json, DatafileError> {
         // Parse content as JSON
-        let value = from_str(&content)
+        let value = from_str(content)
             .into_report()
             .change_context(DatafileError::InvalidJson)?;
 
