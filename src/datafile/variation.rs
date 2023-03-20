@@ -19,10 +19,11 @@ pub struct Variation {
 }
 
 impl Variation {
-    pub(crate) fn new(id: String, key: String, is_feature_enabled: bool) -> Variation {
+    // Create a new variation
+    pub(crate) fn new<T: Into<String>>(id: T, key: T, is_feature_enabled: bool) -> Variation {
         Variation {
-            id,
-            key,
+            id: id.into(),
+            key: key.into(),
             is_feature_enabled,
         }
     }
@@ -55,5 +56,18 @@ impl Variation {
     /// Getter for `is_feature_enabled` field
     pub fn is_feature_enabled(&self) -> bool {
         self.is_feature_enabled
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn create_simple_variation() {
+        let variation = Variation::new("1234", "on", true);
+
+        assert!(variation.is_feature_enabled());
+        assert_eq!(variation.key(), "on");
     }
 }

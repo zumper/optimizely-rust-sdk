@@ -15,6 +15,14 @@ pub struct Experiment {
 }
 
 impl Experiment {
+    pub(crate) fn new<T: Into<String>>(id: T, campaign_id: T, traffic_allocation: TrafficAllocation) -> Experiment {
+        Experiment {
+            id: id.into(),
+            campaign_id: campaign_id.into(),
+            traffic_allocation,
+        }
+    }
+
     pub(crate) fn build(json: &mut Json) -> Result<Experiment, DatafileError> {
         // Get fields as string
         let id = json.get("id")?.as_string()?;
@@ -37,11 +45,7 @@ impl Experiment {
         // Build TrafficAllocation struct
         let traffic_allocation = TrafficAllocation::build(json, &mut variations)?;
 
-        Ok(Experiment {
-            id,
-            campaign_id,
-            traffic_allocation,
-        })
+        Ok(Experiment::new(id, campaign_id, traffic_allocation))
     }
 
     pub fn id(&self) -> &str {

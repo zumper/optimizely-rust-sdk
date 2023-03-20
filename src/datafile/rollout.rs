@@ -11,6 +11,13 @@ pub struct Rollout {
 }
 
 impl Rollout {
+    pub(crate) fn new<T: Into<String>>(id: T, experiments: Vec<Experiment>) -> Rollout {
+        Rollout {
+            id: id.into(),
+            experiments,
+        }
+    }
+
     pub(crate) fn build(json: &mut Json) -> Result<Rollout, DatafileError> {
         let id = json.get("id")?.as_string()?;
 
@@ -20,7 +27,7 @@ impl Rollout {
             .map(|mut json| Experiment::build(&mut json))
             .collect::<Result<Vec<_>, _>>()?;
 
-        Ok(Rollout { id, experiments })
+        Ok(Rollout::new(id, experiments))
     }
 
     pub fn experiments(&self) -> &Vec<Experiment> {

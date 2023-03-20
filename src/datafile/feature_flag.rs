@@ -15,6 +15,14 @@ pub struct FeatureFlag {
 }
 
 impl FeatureFlag {
+    pub(crate) fn new<T: Into<String>>(key: T, rollout: Rollout, experiments: Vec<Experiment>) -> FeatureFlag {
+        FeatureFlag {
+            key: key.into(),
+            rollout,
+            experiments,
+        }
+    }
+
     /// Builds a feature flag from JSON datafile
     pub(crate) fn build(
         json: &mut Json,
@@ -49,12 +57,7 @@ impl FeatureFlag {
             })
             .collect::<Result<Vec<_>, _>>()?;
 
-        let flag = FeatureFlag {
-            key,
-            rollout,
-            experiments,
-        };
-        Ok(flag)
+        Ok(FeatureFlag::new(key, rollout, experiments))
     }
 
     pub fn key(&self) -> &str {
