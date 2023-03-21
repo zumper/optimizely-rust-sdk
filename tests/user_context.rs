@@ -38,3 +38,18 @@ fn user_context_with_attributes() {
     assert_eq!(user_context.attributes().get("is_employee").unwrap(), "true");
     assert_eq!(user_context.attributes().get("app_version").unwrap(), "1.3.2");
 }
+
+#[test]
+#[cfg(feature = "online")]
+fn user_context_track_event() {
+    let ctx = setup();
+
+    // Create user context with given attributes
+    let user_context = ctx.client.create_user_context("user123");
+
+    // Send a conversion event
+    user_context.track_event("purchase");
+
+    // Assert that exactly one event is dispatched
+    assert_eq!(ctx.event_list.borrow().len(), 1);
+}

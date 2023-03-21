@@ -11,6 +11,8 @@
 /// let campaign_id = "9300000133039";
 /// let experiment_id = "9300000169122";
 /// let variation_id = "87757";
+/// let event_id = "22305150298";
+/// let event_key = "purchase";
 ///
 /// // Create two events from above IDs
 /// let decision = Event::decision(
@@ -22,7 +24,9 @@
 /// );
 /// let conversion = Event::conversion(
 ///     account_id,
-///     user_id
+///     user_id,
+///     event_id,
+///     event_key
 /// );
 ///
 /// // Assertions
@@ -52,6 +56,10 @@ pub enum Event {
         account_id: String,
         #[doc(hidden)]
         user_id: String,
+        #[doc(hidden)]
+        event_id: String,
+        #[doc(hidden)]
+        event_key: String,
     },
 }
 
@@ -70,10 +78,12 @@ impl Event {
     }
 
     /// Constructor for a new decision event
-    pub fn conversion<T: Into<String>>(account_id: T, user_id: T) -> Event {
+    pub fn conversion<T: Into<String>>(account_id: T, user_id: T, event_id: T, event_key: T) -> Event {
         Event::Conversion {
             account_id: account_id.into(),
             user_id: user_id.into(),
+            event_id: event_id.into(),
+            event_key: event_key.into(),
         }
     }
 

@@ -6,6 +6,7 @@ use std::collections::HashMap;
 
 // Relative imports of sub modules
 pub use error::DatafileError;
+pub(crate) use event::Event;
 pub(crate) use experiment::Experiment;
 pub(crate) use feature_flag::FeatureFlag;
 pub(crate) use json::Json;
@@ -14,6 +15,7 @@ pub(crate) use traffic_allocation::TrafficAllocation;
 pub(crate) use variation::Variation;
 
 mod error;
+mod event;
 mod experiment;
 mod feature_flag;
 mod json;
@@ -25,6 +27,7 @@ mod variation;
 pub(crate) struct Datafile {
     account_id: String,
     revision: u32,
+    events: HashMap<String, Event>,
     feature_flags: HashMap<String, FeatureFlag>,
 }
 
@@ -41,6 +44,15 @@ impl Datafile {
             .parse()
             .into_report()
             .change_context(DatafileError::InvalidRevision(revision))?;
+
+        let events = json
+            .get("events")?
+            .as_array()?
+            .map(|mut json| Event::build(&mut json))
+            .collect::<Result<Vec<_>, _>>()?
+            .into_iter()
+            .map(|event| (event.key().to_owned(), event))
+            .collect::<HashMap<_, _>>();
 
         // Get HashMap of Rollouts
         let mut rollouts = json
@@ -75,6 +87,7 @@ impl Datafile {
         Ok(Datafile {
             account_id,
             revision,
+            events,
             feature_flags,
         })
     }
@@ -89,5 +102,9 @@ impl Datafile {
 
     pub fn get_flag(&self, flag_key: &str) -> Option<&FeatureFlag> {
         self.feature_flags.get(flag_key)
+    }
+
+    pub fn get_event(&self, event_key: &str) -> Option<&Event> {
+        self.events.get(event_key)
     }
 }

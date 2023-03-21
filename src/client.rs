@@ -72,7 +72,7 @@ impl Client {
 
     /// Get the event dispatcher within the client
     #[cfg(feature = "online")]
-    pub(crate) fn event_dispatcher(&self) -> &dyn EventDispatcher {
+    pub fn event_dispatcher(&self) -> &dyn EventDispatcher {
         &*self.event_dispatcher
     }
 }

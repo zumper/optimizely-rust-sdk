@@ -7,7 +7,7 @@ use crate::datafile::{Experiment, FeatureFlag, Variation};
 use crate::decision::{DecideOptions, Decision};
 
 #[cfg(feature = "online")]
-use crate::event_api::Event;
+use crate::event_api;
 
 // Imports from super
 use super::Client;
@@ -83,6 +83,30 @@ impl UserContext<'_> {
     pub fn attributes(&self) -> &UserAttributes {
         // Return borrowed reference to attributes
         &self.attributes
+    }
+
+    #[cfg(feature = "online")]
+    /// Track a conversion event for this user
+    pub fn track_event(&self, event_key: &str) {
+        match self.client.datafile().get_event(event_key) {
+            Some(event) => {
+                log::debug!("Logging conversion event");
+
+                // Send out a decision event as a side effect
+                let user_id = self.user_id();
+                let account_id = self.client.account_id();
+                let event_id = event.id();
+
+                // Create event_api::Event to send to dispatcher
+                let conversion_event = event_api::Event::conversion(account_id, user_id, event_id, event_key);
+
+                // Ignore result of the send_decision function
+                self.client.event_dispatcher().send_event(conversion_event);
+            }
+            None => {
+                log::warn!("Event key does not exist in datafile");
+            }
+        }
     }
 
     /// Decide which variation to show to a user
@@ -174,10 +198,13 @@ impl UserContext<'_> {
                         let account_id = self.client.account_id();
                         let campaign_id = experiment.campaign_id();
                         let variation_id = variation.id();
-                        let event = Event::decision(account_id, user_id, campaign_id, experiment_id, variation_id);
+
+                        // Create event_api::Event to send to dispatcher
+                        let decision_event =
+                            event_api::Event::decision(account_id, user_id, campaign_id, experiment_id, variation_id);
 
                         // Ignore result of the send_decision function
-                        self.client.event_dispatcher().send_event(event);
+                        self.client.event_dispatcher().send_event(decision_event);
                     }
                 }
                 Some(variation)

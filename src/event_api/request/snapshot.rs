@@ -16,11 +16,12 @@ impl Snapshot {
     }
 
     pub fn add_decision(&mut self, campaign_id: String, experiment_id: String, variation_id: String) {
-        self.decisions
-            .push(Decision::new(campaign_id, experiment_id, variation_id));
+        let decision = Decision::new(campaign_id, experiment_id, variation_id);
+        self.decisions.push(decision);
     }
 
-    pub fn add_event(&mut self, entity_id: String, event_type: String) {
-        self.events.push(Event::new(entity_id, event_type));
+    pub fn add_event(&mut self, entity_id: String, event_key: String) {
+        let event = Event::new(entity_id, event_key);
+        self.events.push(event);
     }
 }

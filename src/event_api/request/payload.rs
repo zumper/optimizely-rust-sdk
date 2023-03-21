@@ -8,6 +8,9 @@ use super::{super::Event, Visitor};
 const CLIENT_NAME: &str = "rust-sdk";
 const CLIENT_VERSION: &str = env!("CARGO_PKG_VERSION");
 
+// Event key for activating an experiment
+const ACTIVATE_EVENT_KEY: &str = "campaign_activated";
+
 #[derive(Serialize)]
 /// HTTP request payload to send to Event API
 pub struct Payload<'a> {
@@ -60,11 +63,15 @@ impl Payload<'_> {
                 visitor.add_decision(campaign_id, experiment_id, variation_id);
 
                 // Add campaign_activated event
-                visitor.add_event(entity_id, String::from("campaign_activated"));
+                visitor.add_event(entity_id, String::from(ACTIVATE_EVENT_KEY));
             }
-            Event::Conversion { .. } => {
+            Event::Conversion {
+                event_id, event_key, ..
+            } => {
                 log::debug!("Adding conversion event to log payload");
-                // TODO: implement
+
+                // Add custom event
+                visitor.add_event(event_id, event_key);
             }
         }
 

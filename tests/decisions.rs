@@ -8,7 +8,7 @@ macro_rules! assert_decision {
         let user_context = $ctx.client.create_user_context($user_id);
 
         // Make decision for user
-        let decision = user_context.decide_with_options($flag_key, &$ctx.decide_options);
+        let decision = user_context.decide($flag_key);
 
         // Assert the decision is consitent with given values
         assert_eq!(decision.enabled(), $enabled);
@@ -38,6 +38,9 @@ fn qa_rollout_flag() {
     assert_decision!(ctx, flag_key, "user13", true, "on");
     assert_decision!(ctx, flag_key, "user14", false, "off");
     assert_decision!(ctx, flag_key, "user15", true, "on");
+
+    // Since this key is a rollout, no events should be dispatched
+    assert_eq!(ctx.event_list.borrow().len(), 0);
 }
 
 #[test]
@@ -78,6 +81,9 @@ fn buy_button_flag() {
     assert_decision!(ctx, flag_key, "user29", true, "danger");
     assert_decision!(ctx, flag_key, "user30", true, "success");
     assert_decision!(ctx, flag_key, "user31", true, "primary");
+
+    // Each of those 32 users should dispatch an event
+    assert_eq!(ctx.event_list.borrow().len(), 32);
 }
 
 #[test]
@@ -90,4 +96,7 @@ fn invalid_flag() {
     assert_decision!(ctx, flag_key, "user2", false, "off");
     assert_decision!(ctx, flag_key, "user3", false, "off");
     assert_decision!(ctx, flag_key, "user4", false, "off");
+
+    // Since this key does not exist, no events should be dispatched
+    assert_eq!(ctx.event_list.borrow().len(), 0);
 }

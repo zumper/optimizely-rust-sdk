@@ -61,7 +61,7 @@ fn with_missing_properties() {
 }
 
 #[test]
-fn with_invalid_array_propertie() {
+fn with_invalid_array_properties() {
     // Valid JSON, but rollouts, experiments, and featureFlags should be an array
     let json = r#"
     {
@@ -69,7 +69,8 @@ fn with_invalid_array_propertie() {
         "revision": "73",
         "rollouts": null,
         "experiments": null,
-        "featureFlags": null
+        "featureFlags": null,
+        "events": null
     }"#;
 
     // Get error report
