@@ -80,16 +80,16 @@ impl Event {
     /// Getter for the account_id field that exists for both `Event::Decision` and `Event::Conversion`
     pub fn account_id(&self) -> &str {
         match self {
-            Event::Decision { account_id, .. } => &account_id,
-            Event::Conversion { account_id, .. } => &account_id,
+            Event::Decision { account_id, .. } => account_id,
+            Event::Conversion { account_id, .. } => account_id,
         }
     }
 
     /// Getter for the user_id field that exists for both `Event::Decision` and `Event::Conversion`
     pub fn user_id(&self) -> &str {
         match self {
-            Event::Decision { user_id, .. } => &user_id,
-            Event::Conversion { user_id, .. } => &user_id,
+            Event::Decision { user_id, .. } => user_id,
+            Event::Conversion { user_id, .. } => user_id,
         }
     }
 }

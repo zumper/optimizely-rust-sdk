@@ -41,7 +41,7 @@ impl Json {
         Ok(Json::new(value))
     }
 
-    pub(crate) fn as_string(self) -> Result<String, DatafileError> {
+    pub(crate) fn as_string(&self) -> Result<String, DatafileError> {
         let value = self.value.as_str().ok_or_else(|| {
             // Unable to read property as a string
             Report::new(DatafileError::InvalidType(TYPE_STRING.into()))
@@ -53,7 +53,7 @@ impl Json {
         Ok(value)
     }
 
-    pub(crate) fn as_integer(self) -> Result<u64, DatafileError> {
+    pub(crate) fn as_integer(&self) -> Result<u64, DatafileError> {
         let value = self.value.as_u64().ok_or_else(|| {
             // Unable to read property as an integer
             Report::new(DatafileError::InvalidType(TYPE_INTEGER.into()))
@@ -62,7 +62,7 @@ impl Json {
         Ok(value)
     }
 
-    pub(crate) fn as_boolean(self) -> Result<bool, DatafileError> {
+    pub(crate) fn as_boolean(&self) -> Result<bool, DatafileError> {
         let value = self.value.as_bool().ok_or_else(|| {
             // Unable to read property as a boolean
             Report::new(DatafileError::InvalidType(TYPE_BOOLEAN.into()))
