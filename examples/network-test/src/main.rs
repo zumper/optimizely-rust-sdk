@@ -1,4 +1,4 @@
-use optimizely::{ClientBuilder, event::BatchedEventDispatcher};
+use optimizely::{ClientBuilder, event_api::BatchedEventDispatcher};
 use std::error::Error;
 use env_logger::Target;
 use log::LevelFilter;

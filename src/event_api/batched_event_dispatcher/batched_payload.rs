@@ -1,5 +1,5 @@
 // Imports from crate
-use crate::event::Payload;
+use super::super::{EventApiClient, Payload};
 
 // Upper limit to number of events in a batch
 const DEFAULT_BATCH_THRESHOLD: u16 = 10;
@@ -61,7 +61,7 @@ impl BatchedPayload<'_> {
                 log::debug!("Sending log payload to Event API");
 
                 // Send payload to endpoint
-                match payload.send() {
+                match EventApiClient::send(payload) {
                     Ok(_) => {
                         log::info!("Successfull request to Event API");
                     }

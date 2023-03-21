@@ -1,18 +1,3 @@
-//! Event logging to Optimizely Event API
-
-// Relative imports of sub modules
-pub use batched_event_dispatcher::BatchedEventDispatcher;
-pub use error::EventError;
-use payload::Payload;
-pub use simple_event_dispatcher::SimpleEventDispatcher;
-pub use trait_event_dispatcher::EventDispatcher;
-
-mod batched_event_dispatcher;
-mod error;
-mod payload;
-mod simple_event_dispatcher;
-mod trait_event_dispatcher;
-
 /// Representation of the events which can be dispatched to Optimizely Event API
 ///
 /// An event can either be a decision or conversion.
@@ -36,7 +21,7 @@ impl Event {
     /// Constructor for a new decision event
     ///
     /// ```
-    /// use optimizely::event::Event;
+    /// use optimizely::event_api::Event;
     ///
     /// // Create some example IDs
     /// let account_id = "21537940595";

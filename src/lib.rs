@@ -10,4 +10,4 @@ pub mod datafile;
 pub mod decision;
 
 #[cfg(feature = "online")]
-pub mod event;
+pub mod event_api;

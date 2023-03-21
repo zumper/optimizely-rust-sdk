@@ -1,30 +1,12 @@
 // External imports
-use error_stack::{IntoReport, Result, ResultExt};
-use serde::{Serialize};
+use serde::Serialize;
 
 // Imports from super
-use super::EventError;
-
-// Relative imports of sub modules
-use decision::Decision;
-use event::Event;
-use visitor::Visitor;
-use snapshot::Snapshot;
-
-mod decision;
-mod event;
-mod snapshot;
-mod visitor;
-
-// Information about the API endpoint
-const ENDPOINT_URL: &str = "https://logx.optimizely.com/v1/events";
-const CONTENT_TYPE_KEY: &str = "content-type";
-const CONTENT_TYPE_VALUE: &str = "application/json";
+use super::Visitor;
 
 // Information regarding the SDK client
 const CLIENT_NAME: &str = "rust-sdk";
 const CLIENT_VERSION: &str = env!("CARGO_PKG_VERSION");
-
 
 #[derive(Serialize)]
 pub struct Payload<'a> {
@@ -69,20 +51,5 @@ impl Payload<'_> {
 
         // Add to the list
         self.visitors.push(visitor);
-    }
-
-    pub fn send(self) -> Result<(), EventError> {
-
-        // Convert to JSON document and dump as String
-        let body = serde_json::to_string(&self).unwrap();
-
-        // Make POST request
-        ureq::post(ENDPOINT_URL)
-            .set(CONTENT_TYPE_KEY, CONTENT_TYPE_VALUE)
-            .send_string(&body)
-            .into_report()
-            .change_context(EventError::FailedRequest)?;
-
-        Ok(())
     }
 }

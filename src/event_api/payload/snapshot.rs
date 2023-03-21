@@ -1,8 +1,8 @@
 // External imports
 use serde::Serialize;
 
-// Imports from crate
-use crate::event::payload::{Decision, Event};
+// Imports from super
+use super::{Decision, Event};
 
 #[derive(Serialize, Default)]
 pub struct Snapshot {

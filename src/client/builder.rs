@@ -8,13 +8,13 @@ use crate::client::{Client, ClientError};
 use crate::datafile::{Datafile, Json};
 
 #[cfg(feature = "online")]
-use crate::event::{EventDispatcher, SimpleEventDispatcher};
+use crate::event_api::{EventDispatcher, SimpleEventDispatcher};
 
 /// Factory/builder pattern for the SDK client
 ///
 /// ```
 /// use optimizely::ClientBuilder;
-/// use optimizely::event::BatchedEventDispatcher;
+/// use optimizely::event_api::BatchedEventDispatcher;
 ///
 /// // Initialize Optimizely client using local datafile and custom event dispatcher
 /// let file_path = "examples/datafiles/sandbox.json";

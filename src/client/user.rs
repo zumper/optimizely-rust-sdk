@@ -7,7 +7,7 @@ use crate::datafile::{Experiment, FeatureFlag, Variation};
 use crate::decision::{DecideOptions, Decision};
 
 #[cfg(feature = "online")]
-use crate::event::Event;
+use crate::event_api::Event;
 
 // Imports from super
 use super::Client;

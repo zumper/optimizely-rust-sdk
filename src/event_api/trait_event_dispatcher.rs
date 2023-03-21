@@ -6,7 +6,7 @@ use super::Event;
 /// It is possible to make a custom event disptacher by implementing this trait
 /// ```
 /// use std::cell::RefCell;
-/// use optimizely::event::{Event, EventDispatcher};
+/// use optimizely::event_api::{Event, EventDispatcher};
 /// #
 /// # // Create some example IDs
 /// # let account_id = "21537940595";

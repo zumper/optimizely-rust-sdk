@@ -4,7 +4,7 @@
 use crate::datafile::Datafile;
 
 #[cfg(feature = "online")]
-use crate::event::EventDispatcher;
+use crate::event_api::EventDispatcher;
 
 // Relative imports of sub modules
 pub use builder::ClientBuilder;

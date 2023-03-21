@@ -1,8 +1,8 @@
 // External imports
 use serde::Serialize;
 
-// Imports from crate
-use crate::event::payload::Snapshot;
+// Imports from super
+use super::Snapshot;
 
 #[derive(Serialize)]
 pub struct Visitor {

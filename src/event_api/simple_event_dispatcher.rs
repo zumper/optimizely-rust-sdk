@@ -1,10 +1,10 @@
 // Imports from super
-use super::{Event, EventDispatcher, Payload};
+use super::{Event, EventApiClient, EventDispatcher, Payload};
 
 /// Implementation of the EventDisptacher trait that makes an HTTP request for every event
 ///
 /// ```
-/// use optimizely::event::{Event, EventDispatcher, SimpleEventDispatcher};
+/// use optimizely::event_api::{Event, EventDispatcher, SimpleEventDispatcher};
 ///
 /// // Create some example IDs
 /// let account_id = "21537940595";
@@ -50,7 +50,7 @@ impl EventDispatcher for SimpleEventDispatcher {
                 payload.add_decision(user_id, campaign_id, experiment_id, variation_id);
 
                 // And send
-                payload.send()
+                EventApiClient::send(payload)
             }
             _ => {
                 // TODO: implement conversion event

@@ -3,17 +3,17 @@ use std::sync::mpsc;
 use std::thread;
 
 // Imports from super
-use crate::event::{Event, EventDispatcher};
+use super::{Event, EventDispatcher};
 
 // Relative imports of sub modules
-use payload::BatchedPayload;
+use batched_payload::BatchedPayload;
 
-mod payload;
+mod batched_payload;
 
 /// Implementation of the EventDisptacher trait that collects multiple events before sending them
 ///
 /// ```
-/// use optimizely::event::{BatchedEventDispatcher, Event, EventDispatcher};
+/// use optimizely::event_api::{BatchedEventDispatcher, Event, EventDispatcher};
 ///
 /// // Create some example IDs
 /// let account_id = "21537940595";
