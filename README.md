@@ -45,3 +45,4 @@ A list of the features that are currently included:
 - [ ] Evaluating audience conditions
 - [ ] Variation variables
 - [ ] Forced decision methods
+- [ ] Mutual exclusion groups

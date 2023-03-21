@@ -42,7 +42,17 @@ pub struct Client {
 impl Client {
     /// Create a new user context for a given user id
     pub fn create_user_context<'a>(&'a self, user_id: &'a str) -> UserContext {
-        UserContext::new(self, user_id)
+        // Create an empty set of user attributes
+        let attributes = UserAttributes::new();
+
+        UserContext::new(self, user_id, attributes)
+    }
+
+    /// Create a new user context for a given user id
+    pub fn create_user_context_with_attributes<'a>(
+        &'a self, user_id: &'a str, attributes: UserAttributes,
+    ) -> UserContext {
+        UserContext::new(self, user_id, attributes)
     }
 
     /// Get the current Optimizely account id

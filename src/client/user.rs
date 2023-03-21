@@ -23,7 +23,31 @@ const MAX_OF_RANGE: f64 = 10_000_f64;
 
 /// User specific context
 ///
-/// Foo
+/// ```
+/// use optimizely::{ClientBuilder, decision::DecideOptions};
+///
+/// // Initialize Optimizely client using local datafile
+/// let file_path = "examples/datafiles/sandbox.json";
+/// let optimizely_client = ClientBuilder::new()
+///     .with_local_datafile(file_path).unwrap()
+///     .build().unwrap();
+///
+/// // Do not send any decision events
+/// let decide_options = DecideOptions {
+///     disable_decision_event: true,
+///     ..DecideOptions::default()
+/// };
+///
+/// // Create a user context
+/// let attributes = optimizely::user_attributes! {
+///     "is_employee" => "true",
+///     "app_version" => "1.3.2",
+/// };
+/// let user_context = optimizely_client.create_user_context("123abc789xyz");
+///
+/// // Decide a feature flag for this user
+/// let decision = user_context.decide_with_options("buy_button", &decide_options);
+/// ```
 pub struct UserContext<'a> {
     client: &'a Client,
     user_id: &'a str,
@@ -31,10 +55,8 @@ pub struct UserContext<'a> {
 }
 
 impl UserContext<'_> {
-    pub(crate) fn new<'a>(client: &'a Client, user_id: &'a str) -> UserContext<'a> {
-        // Create an empty set of user attributes
-        let attributes = UserAttributes::new();
-
+    // Only allow UserContext to be constructed from a Client
+    pub(crate) fn new<'a>(client: &'a Client, user_id: &'a str, attributes: UserAttributes) -> UserContext<'a> {
         UserContext {
             client,
             user_id,
@@ -42,22 +64,14 @@ impl UserContext<'_> {
         }
     }
 
-    // TODO: add pub fn new_with_attributes
-
     /// Add a new attribute to a user context
-    pub fn set_attribute<T: Into<String>>(&mut self, key: T, value: T) {
+    pub fn set_attribute<T: Into<String>>(&mut self, key: &str, value: T) {
         // Create owned copies of the key and value
         let key = key.into();
         let value = value.into();
 
         // Add the attribute
         self.attributes.insert(key, value);
-    }
-
-    /// Get the parent client of a user context
-    #[allow(dead_code)]
-    pub(crate) fn client(&self) -> &Client {
-        self.client
     }
 
     /// Get the id of a user
@@ -72,18 +86,6 @@ impl UserContext<'_> {
     }
 
     /// Decide which variation to show to a user
-    ///
-    /// ```
-    /// # use optimizely::ClientBuilder;
-    /// # let file_path = "examples/datafiles/sandbox.json";
-    /// # let optimizely_client = ClientBuilder::new()
-    /// #     .with_local_datafile(file_path).unwrap()
-    /// #     .build().unwrap();
-    /// #
-    /// let user_context = optimizely_client.create_user_context("123abc789xyz");
-    ///
-    /// let decision = user_context.decide("buy_button");
-    /// ```
     pub fn decide<'b>(&self, flag_key: &'b str) -> Decision<'b> {
         let options = DecideOptions::default();
         self.decide_with_options(flag_key, &options)
@@ -169,7 +171,7 @@ impl UserContext<'_> {
                     #[cfg(feature = "online")]
                     {
                         // Send out a decision event as a side effect
-                        let account_id = self.client().account_id();
+                        let account_id = self.client.account_id();
                         let campaign_id = experiment.campaign_id();
                         let variation_id = variation.id();
                         let event = Event::decision(account_id, user_id, campaign_id, experiment_id, variation_id);
@@ -190,10 +192,10 @@ impl UserContext<'_> {
 macro_rules! user_attributes {
     { $( $key: expr => $value: expr),* $(,)?} => {
         {
-            let mut attribute = UserAttributes::new();
+            let mut attribute = optimizely::client::UserAttributes::new();
 
             $(
-                attribute.insert($key.to_owned(), $value.to_owned());
+                attribute.insert($key.into(), $value.into());
             )*
 
             attribute
