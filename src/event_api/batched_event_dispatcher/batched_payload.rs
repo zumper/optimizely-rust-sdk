@@ -1,5 +1,5 @@
 // Imports from crate
-use super::super::{EventApiClient, Payload};
+use super::super::{request::Payload, Event, EventApiClient};
 
 // Upper limit to number of events in a batch
 const DEFAULT_BATCH_THRESHOLD: u16 = 10;
@@ -20,27 +20,22 @@ impl BatchedPayload<'_> {
         }
     }
 
-    pub(super) fn add_decision(
-        &mut self, account_id: String, visitor_id: String, campaign_id: String, experiment_id: String,
-        variation_id: String,
-    ) {
-        log::debug!("Adding decision event to log payload");
-
+    pub(super) fn add_event(&mut self, event: Event) {
         // Add to the existing payload or create a new one
         match self.payload_option.as_mut() {
             None => {
                 // Create new payload
-                let mut payload = Payload::new(account_id);
+                let mut payload = Payload::new(event.account_id());
 
                 // Add decision
-                payload.add_decision(visitor_id, campaign_id, experiment_id, variation_id);
+                payload.add_event(event);
 
                 // Store for next iteration
                 self.payload_option = Some(payload);
             }
             Some(payload) => {
                 // Add decision
-                payload.add_decision(visitor_id, campaign_id, experiment_id, variation_id);
+                payload.add_event(event);
             }
         };
 

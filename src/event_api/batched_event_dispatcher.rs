@@ -56,20 +56,7 @@ impl Default for BatchedEventDispatcher {
 
             // Keep receiving new message from the main thread
             for event in receiver.iter() {
-                match event {
-                    Event::Decision {
-                        account_id,
-                        user_id,
-                        campaign_id,
-                        experiment_id,
-                        variation_id,
-                    } => {
-                        batched_payload.add_decision(account_id, user_id, campaign_id, experiment_id, variation_id);
-                    }
-                    _ => {
-                        log::error!("Not implemented yet");
-                    }
-                }
+                batched_payload.add_event(event);
             }
         });
 

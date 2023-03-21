@@ -1,3 +1,5 @@
+//! Structure for the request payload
+
 // Relative imports of sub modules
 use decision::Decision;
 use event::Event;

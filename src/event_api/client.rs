@@ -2,7 +2,7 @@
 use error_stack::{IntoReport, Result, ResultExt};
 
 // Imports from super
-use super::{EventApiError, Payload};
+use super::{request::Payload, EventApiError};
 
 // Information about the API endpoint
 const ENDPOINT_URL: &str = "https://logx.optimizely.com/v1/events";

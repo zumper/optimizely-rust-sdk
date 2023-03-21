@@ -1,5 +1,5 @@
 // Imports from super
-use super::{Event, EventApiClient, EventDispatcher, Payload};
+use super::{request::Payload, Event, EventApiClient, EventDispatcher};
 
 /// Implementation of the EventDisptacher trait that makes an HTTP request for every event
 ///
@@ -35,30 +35,14 @@ impl EventDispatcher for SimpleEventDispatcher {
     fn send_event(&self, event: Event) {
         log::debug!("Sending log payload to Event API");
 
-        let result = match event {
-            Event::Decision {
-                account_id,
-                user_id,
-                campaign_id,
-                experiment_id,
-                variation_id,
-            } => {
-                // Generate a new payload
-                let mut payload = Payload::new(account_id);
+        // Generate a new payload
+        let mut payload = Payload::new(event.account_id());
 
-                // Add single decision
-                payload.add_decision(user_id, campaign_id, experiment_id, variation_id);
+        // Add single decision
+        payload.add_event(event);
 
-                // And send
-                EventApiClient::send(payload)
-            }
-            _ => {
-                // TODO: implement conversion event
-                Ok(())
-            }
-        };
-
-        match result {
+        // And send
+        match EventApiClient::send(payload) {
             Ok(_) => {
                 log::info!("Succesfull request to Event API");
             }

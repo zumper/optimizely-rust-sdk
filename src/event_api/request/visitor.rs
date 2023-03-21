@@ -7,14 +7,14 @@ use super::Snapshot;
 #[derive(Serialize)]
 pub struct Visitor {
     visitor_id: String,
-    // attributes
+    // TODO: add field `attributes`
     snapshots: [Snapshot; 1],
 }
 
 impl Visitor {
-    pub fn new(visitor_id: String) -> Visitor {
+    pub fn new<T: Into<String>>(visitor_id: T) -> Visitor {
         Visitor {
-            visitor_id,
+            visitor_id: visitor_id.into(),
             snapshots: [Snapshot::new()],
         }
     }
