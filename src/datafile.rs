@@ -6,6 +6,7 @@ use std::collections::HashMap;
 
 // Relative imports of sub modules
 pub use error::DatafileError;
+#[cfg(feature = "online")]
 pub(crate) use event::Event;
 pub(crate) use experiment::Experiment;
 pub(crate) use feature_flag::FeatureFlag;
@@ -15,6 +16,7 @@ pub(crate) use traffic_allocation::TrafficAllocation;
 pub(crate) use variation::Variation;
 
 mod error;
+#[cfg(feature = "online")]
 mod event;
 mod experiment;
 mod feature_flag;
@@ -27,8 +29,9 @@ mod variation;
 pub(crate) struct Datafile {
     account_id: String,
     revision: u32,
-    events: HashMap<String, Event>,
     feature_flags: HashMap<String, FeatureFlag>,
+    #[cfg(feature = "online")]
+    events: HashMap<String, Event>,
 }
 
 impl Datafile {
@@ -45,6 +48,7 @@ impl Datafile {
             .into_report()
             .change_context(DatafileError::InvalidRevision(revision))?;
 
+        #[cfg(feature = "online")]
         let events = json
             .get("events")?
             .as_array()?
@@ -87,8 +91,9 @@ impl Datafile {
         Ok(Datafile {
             account_id,
             revision,
-            events,
             feature_flags,
+            #[cfg(feature = "online")]
+            events,
         })
     }
 
@@ -104,6 +109,7 @@ impl Datafile {
         self.feature_flags.get(flag_key)
     }
 
+    #[cfg(feature = "online")]
     pub fn get_event(&self, event_key: &str) -> Option<&Event> {
         self.events.get(event_key)
     }
