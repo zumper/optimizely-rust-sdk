@@ -12,12 +12,15 @@ use crate::datafile::{Datafile, Json};
 use crate::event_api::{EventDispatcher, SimpleEventDispatcher};
 
 /// State of ClientBuilder indicating that the datafile is still empty.
-/// The `.build` is not implemented on `ClientBuilder<Empty>`
-/// Inspired by: https://youtu.be/_ccDqRTx-JU
+///
+/// The `.build` is not implemented on `ClientBuilder<Empty>`.
+/// Inspired by: <https://youtu.be/_ccDqRTx-JU>
+#[derive(Default)]
 pub struct Empty;
 /// State of ClientBuilder indicating that the datafile is present/ready.
-/// The `.build` is only implemented on `ClientBuilder<Ready>`
-/// Inspired by: https://youtu.be/_ccDqRTx-JU
+///
+/// The `.build` is only implemented on `ClientBuilder<Ready>`.
+/// Inspired by: <https://youtu.be/_ccDqRTx-JU>
 pub struct Ready;
 
 /// Factory/builder pattern for the SDK client
@@ -36,6 +39,7 @@ pub struct Ready;
 ///
 /// # Ok::<(), Box<dyn std::error::Error>>(())
 /// ```
+#[derive(Default)]
 pub struct ClientBuilder<State = Empty> {
     datafile: Option<Datafile>,
     state: PhantomData<State>,
@@ -45,13 +49,8 @@ pub struct ClientBuilder<State = Empty> {
 
 impl ClientBuilder {
     /// Constructor for a new client factory/builder
-    pub fn new() -> ClientBuilder {
-        ClientBuilder {
-            datafile: None,
-            state: PhantomData,
-            #[cfg(feature = "online")]
-            event_dispatcher: None,
-        }
+    pub fn new() -> ClientBuilder<Empty> {
+        ClientBuilder::default()
     }
 }
 
