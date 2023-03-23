@@ -15,8 +15,8 @@ use optimizely::ClientBuilder;
 // Initialize Optimizely client using local datafile
 let file_path = "examples/datafiles/sandbox.json";
 let optimizely_client = ClientBuilder::new()
-    .with_local_datafile(file_path).unwrap()
-    .build().unwrap();
+    .with_local_datafile(file_path)?
+    .build();
 
 // Create user context for current user
 let user_id = "123abc789xyz";
@@ -25,6 +25,9 @@ let user_context = optimizely_client.create_user_context(user_id);
 // Get decision for the Buy Button feature flag
 let feature_flag = "buy_button";
 let decision = user_context.decide(feature_flag);
+
+// Return Ok for doc-tests
+Ok::<(), Box<dyn std::error::Error>>(())
 ```
 
 ## Included features

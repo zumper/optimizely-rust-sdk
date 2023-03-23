@@ -29,8 +29,8 @@ const MAX_OF_RANGE: f64 = 10_000_f64;
 /// // Initialize Optimizely client using local datafile
 /// let file_path = "examples/datafiles/sandbox.json";
 /// let optimizely_client = ClientBuilder::new()
-///     .with_local_datafile(file_path).unwrap()
-///     .build().unwrap();
+///     .with_local_datafile(file_path)?
+///     .build();
 ///
 /// // Do not send any decision events
 /// let decide_options = DecideOptions {
@@ -47,6 +47,8 @@ const MAX_OF_RANGE: f64 = 10_000_f64;
 ///
 /// // Decide a feature flag for this user
 /// let decision = user_context.decide_with_options("buy_button", &decide_options);
+///
+/// # Ok::<(), Box<dyn std::error::Error>>(())
 /// ```
 pub struct UserContext<'a> {
     client: &'a Client,

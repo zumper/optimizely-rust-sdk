@@ -100,8 +100,7 @@ fn with_sdk_key() {
     let client = ClientBuilder::new()
         .with_sdk_key(common::SDK_KEY)
         .expect("sdk key should work")
-        .build()
-        .expect("build should work");
+        .build();
 
     // Check account id property on client
     assert_eq!(client.account_id(), ACCOUNT_ID);
@@ -116,8 +115,7 @@ fn with_fixed_datafile() {
     let client = ClientBuilder::new()
         .with_local_datafile(FILE_PATH)
         .expect("local datafile should work")
-        .build()
-        .expect("build should work");
+        .build();
 
     // Check account id property on client
     assert_eq!(client.account_id(), ACCOUNT_ID);

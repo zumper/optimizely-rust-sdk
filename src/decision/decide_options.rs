@@ -12,8 +12,8 @@ use std::default::Default;
 ///
 /// // Initialize Optimizely client using local datafile
 /// let optimizely_client = ClientBuilder::new()
-///     .with_local_datafile(file_path).unwrap()
-///     .build().unwrap();
+///     .with_local_datafile(file_path)?
+///     .build();
 ///
 /// // Create a user context
 /// let user_context = optimizely_client.create_user_context(user_id);
@@ -26,6 +26,8 @@ use std::default::Default;
 ///
 /// // Make decision but do not send any events
 /// let decision = user_context.decide_with_options(flag_key, &decide_options);
+///
+/// # Ok::<(), Box<dyn std::error::Error>>(())
 /// ```
 #[derive(Debug, Default)]
 pub struct DecideOptions {

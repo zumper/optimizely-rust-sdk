@@ -64,8 +64,7 @@ pub(super) fn setup() -> TestContext {
         .with_event_dispatcher(event_store)
         .with_local_datafile(FILE_PATH)
         .expect("local datafile should work")
-        .build()
-        .expect("build should work");
+        .build();
 
     TestContext { client, event_list }
 }

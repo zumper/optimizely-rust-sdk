@@ -2,6 +2,7 @@
 use error_stack::{IntoReport, Result, ResultExt};
 use std::fs::File;
 use std::io::Read;
+use std::marker::PhantomData;
 
 // Imports from crate
 use crate::client::{Client, ClientError};
@@ -9,6 +10,15 @@ use crate::datafile::{Datafile, Json};
 
 #[cfg(feature = "online")]
 use crate::event_api::{EventDispatcher, SimpleEventDispatcher};
+
+/// State of ClientBuilder indicating that the datafile is still empty.
+/// The `.build` is not implemented on `ClientBuilder<Empty>`
+/// Inspired by: https://youtu.be/_ccDqRTx-JU
+pub struct Empty;
+/// State of ClientBuilder indicating that the datafile is present/ready.
+/// The `.build` is only implemented on `ClientBuilder<Ready>`
+/// Inspired by: https://youtu.be/_ccDqRTx-JU
+pub struct Ready;
 
 /// Factory/builder pattern for the SDK client
 ///
@@ -20,13 +30,15 @@ use crate::event_api::{EventDispatcher, SimpleEventDispatcher};
 /// let file_path = "examples/datafiles/sandbox.json";
 /// let event_dispatcher = BatchedEventDispatcher::default();
 /// let optimizely_client = ClientBuilder::new()
-///     .with_local_datafile(file_path).unwrap()
+///     .with_local_datafile(file_path)?
 ///     .with_event_dispatcher(event_dispatcher)
-///     .build().unwrap();
+///     .build();
+///
+/// # Ok::<(), Box<dyn std::error::Error>>(())
 /// ```
-#[derive(Default)]
-pub struct ClientBuilder {
+pub struct ClientBuilder<State = Empty> {
     datafile: Option<Datafile>,
+    state: PhantomData<State>,
     #[cfg(feature = "online")]
     event_dispatcher: Option<Box<dyn EventDispatcher>>,
 }
@@ -34,12 +46,19 @@ pub struct ClientBuilder {
 impl ClientBuilder {
     /// Constructor for a new client factory/builder
     pub fn new() -> ClientBuilder {
-        ClientBuilder::default()
+        ClientBuilder {
+            datafile: None,
+            state: PhantomData,
+            #[cfg(feature = "online")]
+            event_dispatcher: None,
+        }
     }
+}
 
+impl ClientBuilder<Empty> {
     /// Download the datafile from the CDN using an SDK key
     #[cfg(feature = "online")]
-    pub fn with_sdk_key(self, sdk_key: &str) -> Result<ClientBuilder, ClientError> {
+    pub fn with_sdk_key(self, sdk_key: &str) -> Result<ClientBuilder<Ready>, ClientError> {
         // Construct URL
         let url = format!("https://cdn.optimizely.com/datafiles/{}.json", sdk_key);
 
@@ -61,7 +80,7 @@ impl ClientBuilder {
     }
 
     /// Read the datafile from the local filesystem
-    pub fn with_local_datafile(self, file_path: &str) -> Result<ClientBuilder, ClientError> {
+    pub fn with_local_datafile(self, file_path: &str) -> Result<ClientBuilder<Ready>, ClientError> {
         // Read content from local path
         let mut content = String::new();
 
@@ -80,39 +99,48 @@ impl ClientBuilder {
     }
 
     /// Use a string variable as the datafile
-    pub fn with_datafile_as_string(mut self, content: &str) -> Result<ClientBuilder, ClientError> {
+    pub fn with_datafile_as_string(self, content: &str) -> Result<ClientBuilder<Ready>, ClientError> {
         // Parse content as JSON
         let mut json = Json::build(content).change_context(ClientError::InvalidDatafile)?;
 
         // Create datafile from JSON value
         let datafile = Datafile::build(&mut json).change_context(ClientError::InvalidDatafile)?;
 
-        // Set the build option
-        self.datafile = Some(datafile);
-        Ok(self)
+        Ok(ClientBuilder {
+            datafile: Some(datafile),
+            state: PhantomData,
+            #[cfg(feature = "online")]
+            event_dispatcher: self.event_dispatcher,
+        })
     }
+}
 
+impl<State> ClientBuilder<State> {
     /// Use a custom event dispatcher
     #[cfg(feature = "online")]
-    pub fn with_event_dispatcher(mut self, event_dispatcher: impl EventDispatcher + 'static) -> ClientBuilder {
+    pub fn with_event_dispatcher(mut self, event_dispatcher: impl EventDispatcher + 'static) -> ClientBuilder<State> {
         self.event_dispatcher = Some(Box::new(event_dispatcher));
         self
     }
+}
 
+impl ClientBuilder<Ready> {
     /// Build the client
-    pub fn build(self) -> Result<Client, ClientError> {
+    pub fn build(self) -> Client {
         // Retrieve content from build options
-        let datafile = self.datafile.ok_or(ClientError::DatafileMissing)?;
+        let datafile = self
+            .datafile
+            .expect("Datafile is garantueed to be Some(_) since the state is ready.");
 
         #[cfg(feature = "online")]
         let event_dispatcher = self
             .event_dispatcher
             .unwrap_or_else(|| Box::<SimpleEventDispatcher>::default());
 
-        Ok(Client {
+        Client {
             datafile,
             #[cfg(feature = "online")]
             event_dispatcher,
-        })
+        }
     }
 }

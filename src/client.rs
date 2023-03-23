@@ -7,7 +7,7 @@ use crate::datafile::Datafile;
 use crate::event_api::EventDispatcher;
 
 // Relative imports of sub modules
-pub use builder::ClientBuilder;
+pub use builder::{ClientBuilder, Empty, Ready};
 pub use error::ClientError;
 pub use user::{UserAttributes, UserContext};
 
@@ -25,13 +25,15 @@ mod user;
 ///
 /// // Initialize Optimizely client using local datafile
 /// let optimizely_client = ClientBuilder::new()
-///     .with_local_datafile(file_path).unwrap()
-///     .build().unwrap();
+///     .with_local_datafile(file_path)?
+///     .build();
 ///
 /// // Use methods of client struct
 /// let account_id = optimizely_client.account_id();
 /// let revision = optimizely_client.revision();
 /// let user_context = optimizely_client.create_user_context(user_id);
+///
+/// # Ok::<(), Box<dyn std::error::Error>>(())
 /// ```
 pub struct Client {
     datafile: Datafile,
