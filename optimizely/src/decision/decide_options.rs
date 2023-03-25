@@ -6,7 +6,7 @@ use std::default::Default;
 /// use optimizely::ClientBuilder;
 /// use optimizely::decision::DecideOptions;
 /// #
-/// # let file_path = "examples/datafiles/sandbox.json";
+/// # let file_path = "../datafiles/sandbox.json";
 /// # let flag_key = "buy_button";
 /// # let user_id = "123abc789xyz";
 ///

@@ -20,7 +20,7 @@ mod user;
 /// ```
 /// use optimizely::ClientBuilder;
 /// #
-/// # let file_path = "examples/datafiles/sandbox.json";
+/// # let file_path = "../datafiles/sandbox.json";
 /// # let user_id = "123abc789xyz";
 ///
 /// // Initialize Optimizely client using local datafile

@@ -13,7 +13,7 @@ This SDK only includes a small subset of features compared to supported SDKs. Us
 use optimizely::ClientBuilder;
 
 // Initialize Optimizely client using local datafile
-let file_path = "examples/datafiles/sandbox.json";
+let file_path = "../datafiles/sandbox.json";
 let optimizely_client = ClientBuilder::new()
     .with_local_datafile(file_path)?
     .build();

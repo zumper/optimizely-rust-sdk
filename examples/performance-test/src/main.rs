@@ -6,7 +6,7 @@ const FILE_PATH: &str = "../datafiles/sandbox.json";
 fn main() -> Result<(), Box<dyn Error>> {
     let client = ClientBuilder::new()
         .with_local_datafile(FILE_PATH)?
-        .build()?;
+        .build();
 
     let flag_key = "buy_button";
 

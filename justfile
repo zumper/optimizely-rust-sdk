@@ -13,3 +13,6 @@ test:
 
 fmt:
   rustfmt **/*.rs
+
+run example:
+  cd examples/{{example}} && cargo run

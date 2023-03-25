@@ -27,7 +27,7 @@ const MAX_OF_RANGE: f64 = 10_000_f64;
 /// use optimizely::{ClientBuilder, decision::DecideOptions};
 ///
 /// // Initialize Optimizely client using local datafile
-/// let file_path = "examples/datafiles/sandbox.json";
+/// let file_path = "../datafiles/sandbox.json";
 /// let optimizely_client = ClientBuilder::new()
 ///     .with_local_datafile(file_path)?
 ///     .build();

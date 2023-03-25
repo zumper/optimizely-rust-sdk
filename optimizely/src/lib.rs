@@ -1,4 +1,4 @@
-#![doc = include_str!("../README.md")]
+#![doc = include_str!("../../README.md")]
 #![warn(missing_docs)]
 
 // Reimport/export of structs to make them available at top-level

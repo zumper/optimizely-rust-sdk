@@ -30,7 +30,7 @@ pub struct Ready;
 /// use optimizely::event_api::BatchedEventDispatcher;
 ///
 /// // Initialize Optimizely client using local datafile and custom event dispatcher
-/// let file_path = "examples/datafiles/sandbox.json";
+/// let file_path = "../datafiles/sandbox.json";
 /// let event_dispatcher = BatchedEventDispatcher::default();
 /// let optimizely_client = ClientBuilder::new()
 ///     .with_local_datafile(file_path)?

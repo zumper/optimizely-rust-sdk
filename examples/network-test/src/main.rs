@@ -16,7 +16,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let client = ClientBuilder::new()
         .with_sdk_key(SDK_KEY)?
         .with_event_dispatcher(BatchedEventDispatcher::default())
-        .build()?;
+        .build();
     
     let flag_key = "buy_button";
 
