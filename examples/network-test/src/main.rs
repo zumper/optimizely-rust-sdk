@@ -17,7 +17,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         .with_sdk_key(SDK_KEY)?
         .with_event_dispatcher(BatchedEventDispatcher::default())
         .build();
-    
+
     let flag_key = "buy_button";
 
     for i in 0..20 {
