@@ -8,12 +8,12 @@ pub struct Event {
     uuid: String,
     timestamp: u128,
     entity_id: String,
-    event_key: String,
+    key: String,
     // tags
 }
 
 impl Event {
-    pub fn new(entity_id: String, event_key: String) -> Event {
+    pub fn new(entity_id: String, key: String) -> Event {
         // Generate new UUID
         let uuid = Uuid::new_v4().as_hyphenated().to_string();
 
@@ -27,7 +27,7 @@ impl Event {
             uuid,
             timestamp,
             entity_id,
-            event_key,
+            key,
         }
     }
 }
