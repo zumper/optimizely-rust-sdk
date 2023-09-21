@@ -1,12 +1,10 @@
-use optimizely::{ClientBuilder, decision::DecideOptions};
+use optimizely::{decision::DecideOptions, ClientBuilder};
 use std::error::Error;
 
 const FILE_PATH: &str = "../datafiles/sandbox.json";
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let client = ClientBuilder::new()
-        .with_local_datafile(FILE_PATH)?
-        .build();
+    let client = ClientBuilder::new().with_local_datafile(FILE_PATH)?.build();
 
     let flag_key = "buy_button";
 

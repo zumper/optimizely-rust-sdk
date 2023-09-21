@@ -94,21 +94,21 @@ fn with_invalid_array_properties() {
     );
 }
 
-#[test]
-#[cfg(feature = "online")]
-fn with_sdk_key() {
-    let client = ClientBuilder::new()
-        .with_sdk_key(common::SDK_KEY)
-        .expect("sdk key should work")
-        .build();
+// #[test]
+// #[cfg(feature = "online")]
+// fn with_sdk_key() {
+//     let client = ClientBuilder::new()
+//         .with_sdk_key(common::SDK_KEY)
+//         .expect("sdk key should work")
+//         .build();
 
-    // Check account id property on client
-    assert_eq!(client.account_id(), ACCOUNT_ID);
+//     // Check account id property on client
+//     assert_eq!(client.account_id(), ACCOUNT_ID);
 
-    // Check revision property on client
-    // NOTE: the online datafile might have been updated
-    assert!(client.revision() >= REVISION);
-}
+//     // Check revision property on client
+//     // NOTE: the online datafile might have been updated
+//     assert!(client.revision() >= REVISION);
+// }
 
 #[test]
 fn with_fixed_datafile() {

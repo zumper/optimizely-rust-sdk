@@ -2,7 +2,7 @@
 use error_stack::Result;
 
 // Imports from super
-use super::{DatafileError, Json};
+use super::{Context, DatafileError};
 
 #[derive(Debug)]
 pub struct Event {
@@ -19,13 +19,13 @@ impl Event {
         }
     }
 
-    /// Create a new variation from a JSON value.
-    pub(crate) fn build(json: &mut Json) -> Result<Event, DatafileError> {
+    /// Create a new variation from a Context
+    pub(crate) fn build(context: &mut Context) -> Result<Event, DatafileError> {
         // Get variation_id as String
-        let id = json.get("id")?.as_string()?;
+        let id = context.get("id")?.as_string()?;
 
         // Get variation_key as String
-        let key = json.get("key")?.as_string()?;
+        let key = context.get("key")?.as_string()?;
 
         Ok(Event::new(id, key))
     }

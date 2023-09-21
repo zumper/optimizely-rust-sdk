@@ -1,7 +1,7 @@
-use optimizely::{ClientBuilder, event_api::BatchedEventDispatcher};
-use std::error::Error;
 use env_logger::Target;
 use log::LevelFilter;
+use optimizely::{event_api::BatchedEventDispatcher, ClientBuilder};
+use std::error::Error;
 
 const SDK_KEY: &str = "KVpGWnzPGKvvQ8yeEWmJZ";
 

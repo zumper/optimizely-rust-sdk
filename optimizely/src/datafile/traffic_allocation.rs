@@ -4,7 +4,7 @@ use std::collections::{BTreeMap, HashMap};
 use std::rc::Rc;
 
 // Imports from super
-use super::{DatafileError, Json, Variation};
+use super::{Context, DatafileError, Variation};
 
 #[derive(Debug, Default)]
 pub struct TrafficAllocation {
@@ -17,18 +17,18 @@ impl TrafficAllocation {
     }
 
     pub(crate) fn build(
-        json: &mut Json, variations: &mut HashMap<String, Rc<Variation>>,
+        context: &mut Context, variations: &mut HashMap<String, Rc<Variation>>,
     ) -> Result<TrafficAllocation, DatafileError> {
         // Create a binary tree for efficient look ups
-        let ranges = json
+        let ranges = context
             .get("trafficAllocation")?
             .as_array()?
-            .map(|mut json| {
+            .map(|mut context| {
                 // Get variation_id as String
-                let variation_id = json.get("entityId")?.as_string()?;
+                let variation_id = context.get("entityId")?.as_string()?;
 
                 // Get end_of_range as u64
-                let end_of_range = json.get("endOfRange")?.as_integer()?;
+                let end_of_range = context.get("endOfRange")?.as_integer()?;
 
                 // Remove from hashmap to get an owned copy
                 let variation = variations

@@ -6,7 +6,7 @@ use std::marker::PhantomData;
 
 // Imports from crate
 use crate::client::{Client, ClientError};
-use crate::datafile::{Datafile, Json};
+use crate::datafile::Datafile;
 
 #[cfg(feature = "online")]
 use crate::event_api::{EventDispatcher, SimpleEventDispatcher};
@@ -99,11 +99,8 @@ impl ClientBuilder<Empty> {
 
     /// Use a string variable as the datafile
     pub fn with_datafile_as_string(self, content: &str) -> Result<ClientBuilder<Ready>, ClientError> {
-        // Parse content as JSON
-        let mut json = Json::build(content).change_context(ClientError::InvalidDatafile)?;
-
-        // Create datafile from JSON value
-        let datafile = Datafile::build(&mut json).change_context(ClientError::InvalidDatafile)?;
+        // Create datafile from a string
+        let datafile = Datafile::build(content).change_context(ClientError::InvalidDatafile)?;
 
         Ok(ClientBuilder {
             datafile: Some(datafile),
@@ -129,7 +126,7 @@ impl ClientBuilder<Ready> {
         // Retrieve content from build options
         let datafile = self
             .datafile
-            .expect("Datafile is garantueed to be Some(_) since the state is ready.");
+            .expect("Datafile is guaranteed to be Some(_) since the state is ready.");
 
         #[cfg(feature = "online")]
         let event_dispatcher = self

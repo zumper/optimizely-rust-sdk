@@ -2,7 +2,7 @@
 use error_stack::Result;
 
 // Imports from super
-use super::{DatafileError, Json};
+use super::{Context, DatafileError};
 
 /// A single variation like "off", "on" or other user-created variations.
 ///
@@ -28,17 +28,17 @@ impl Variation {
         }
     }
 
-    /// Create a new variation from a JSON value.
-    pub(crate) fn build(json: &mut Json) -> Result<Variation, DatafileError> {
+    /// Create a new variation from Context
+    pub(crate) fn build(context: &mut Context) -> Result<Variation, DatafileError> {
         // Get variation_id as String
-        let id = json.get("id")?.as_string()?;
+        let id = context.get("id")?.as_string()?;
 
         // Get variation_key as String
-        let key = json.get("key")?.as_string()?;
+        let key = context.get("key")?.as_string()?;
 
         // TODO: fix bug below again
         // BUG: Found an example datafile where this field is missing, therefore default to `false`
-        let is_feature_enabled = json.get("featureEnabled")?.as_boolean()?;
+        let is_feature_enabled = context.get("featureEnabled")?.as_boolean()?;
 
         Ok(Variation::new(id, key, is_feature_enabled))
     }

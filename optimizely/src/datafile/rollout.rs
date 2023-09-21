@@ -2,7 +2,7 @@
 use error_stack::Result;
 
 // Imports from super
-use super::{DatafileError, Experiment, Json};
+use super::{Context, DatafileError, Experiment};
 
 #[derive(Debug)]
 pub struct Rollout {
@@ -18,13 +18,13 @@ impl Rollout {
         }
     }
 
-    pub(crate) fn build(json: &mut Json) -> Result<Rollout, DatafileError> {
-        let id = json.get("id")?.as_string()?;
+    pub(crate) fn build(context: &mut Context) -> Result<Rollout, DatafileError> {
+        let id = context.get("id")?.as_string()?;
 
-        let experiments = json
+        let experiments = context
             .get("experiments")?
             .as_array()?
-            .map(|mut json| Experiment::build(&mut json))
+            .map(|mut context| Experiment::build(&mut context))
             .collect::<Result<Vec<_>, _>>()?;
 
         Ok(Rollout::new(id, experiments))

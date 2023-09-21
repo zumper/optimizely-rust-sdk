@@ -3,7 +3,7 @@ use error_stack::{Report, Result};
 use std::collections::HashMap;
 
 // Imports from super
-use super::{DatafileError, Experiment, Json, Rollout};
+use super::{Context, DatafileError, Experiment, Rollout};
 
 /// Optimizely feature flag.
 #[derive(Debug)]
@@ -23,27 +23,27 @@ impl FeatureFlag {
         }
     }
 
-    /// Builds a feature flag from JSON datafile
+    /// Builds a feature flag from Context
     pub(crate) fn build(
-        json: &mut Json, rollouts: &mut HashMap<String, Rollout>, experiments: &mut HashMap<String, Experiment>,
+        context: &mut Context, rollouts: &mut HashMap<String, Rollout>, experiments: &mut HashMap<String, Experiment>,
     ) -> Result<FeatureFlag, DatafileError> {
         // Get key as String
-        let key = json.get("key")?.as_string()?;
+        let key = context.get("key")?.as_string()?;
 
         // Get rollout_id as String
-        let rollout_id = json.get("rolloutId")?.as_string()?;
+        let rollout_id = context.get("rolloutId")?.as_string()?;
 
         // Remove from hashmap to get an owned copy
         let rollout = rollouts
             .remove(&rollout_id)
             .ok_or_else(|| Report::new(DatafileError::InvalidRolloutId(rollout_id)))?;
 
-        let experiments = json
+        let experiments = context
             .get("experimentIds")?
             .as_array()?
-            .map(|json| {
+            .map(|context| {
                 // Get experiment_id as String
-                let experiment_id = json.as_string()?;
+                let experiment_id = context.as_string()?;
 
                 // Remove from HashMap to get an owned copy
                 // TODO: look for experiment id in either `groups` of `experiments`
