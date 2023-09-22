@@ -12,7 +12,7 @@ test:
   just docs
 
 fmt:
-  rustfmt **/*.rs
+  cargo fmt --all
 
 run example:
   cd examples/{{example}} && cargo run

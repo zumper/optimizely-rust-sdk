@@ -55,7 +55,7 @@ fn with_missing_properties() {
     // Verify the datafile error type
     let datafile_error = report.downcast_ref::<DatafileError>().unwrap();
     assert!(
-        matches!(datafile_error, DatafileError::KeyNotFound(_)),
+        matches!(datafile_error, DatafileError::InvalidJson),
         "Report did not include DatafileError::KeyNotFound"
     );
 }
@@ -89,7 +89,7 @@ fn with_invalid_array_properties() {
     // Verify the datafile error type
     let datafile_error = report.downcast_ref::<DatafileError>().unwrap();
     assert!(
-        matches!(datafile_error, DatafileError::InvalidType(_)),
+        matches!(datafile_error, DatafileError::InvalidJson),
         "Report did not include DatafileError::InvalidType"
     );
 }

@@ -90,7 +90,7 @@ impl UserContext<'_> {
     #[cfg(feature = "online")]
     /// Track a conversion event for this user
     pub fn track_event(&self, event_key: &str) {
-        match self.client.datafile().get_event(event_key) {
+        match self.client.datafile().event(event_key) {
             Some(event) => {
                 log::debug!("Logging conversion event");
 
@@ -120,7 +120,7 @@ impl UserContext<'_> {
     /// Decide which variation to show to a user
     pub fn decide_with_options<'b>(&self, flag_key: &'b str, options: &DecideOptions) -> Decision<'b> {
         // Retrieve Flag object
-        let flag = match self.client.datafile().get_flag(flag_key) {
+        let flag = match self.client.datafile().flag(flag_key) {
             Some(flag) => flag,
             None => {
                 // When flag key cannot be found, return the off variation
@@ -133,7 +133,7 @@ impl UserContext<'_> {
         let send_decision = !options.disable_decision_event;
 
         // Get the selected variation for the given flag
-        match self.get_variation_for_flag(flag, send_decision) {
+        match self.decide_variation_for_flag(flag, send_decision) {
             Some(variation) => {
                 // Unpack the variation and create Decision struct
                 Decision::new(flag_key, variation.is_feature_enabled(), variation.key())
@@ -145,12 +145,16 @@ impl UserContext<'_> {
         }
     }
 
-    fn get_variation_for_flag<'a>(&'a self, flag: &'a FeatureFlag, send_decision: bool) -> Option<&Variation> {
+    fn decide_variation_for_flag<'a>(&'a self, flag: &'a FeatureFlag, send_decision: bool) -> Option<&Variation> {
         // Find first Experiment for which this user qualifies
-        let result = flag
-            .experiments()
-            .iter()
-            .find_map(|experiment| self.get_variation_for_experiment(experiment, send_decision));
+        let result = flag.experiments_ids().iter().find_map(|experiment_id| {
+            let experiment = self.client.datafile().experiment(experiment_id);
+
+            match experiment {
+                Some(experiment) => self.decide_variation_for_experiment(experiment, send_decision),
+                None => None,
+            }
+        });
 
         match result {
             Some(_) => {
@@ -159,17 +163,18 @@ impl UserContext<'_> {
             }
             None => {
                 // No direct experiment found, let's look at the Rollout
+                let rollout = self.client.datafile().rollout(flag.rollout_id()).unwrap(); // TODO: remove unwrap
 
                 // Find the first experiment within the Rollout for which this user qualifies
-                flag.rollout()
+                rollout
                     .experiments()
                     .iter()
-                    .find_map(|experiment| self.get_variation_for_experiment(experiment, false))
+                    .find_map(|experiment| self.decide_variation_for_experiment(experiment, false))
             }
         }
     }
 
-    fn get_variation_for_experiment<'a>(
+    fn decide_variation_for_experiment<'a>(
         &'a self, experiment: &'a Experiment, send_decision: bool,
     ) -> Option<&Variation> {
         // Use references for the ids
@@ -187,19 +192,16 @@ impl UserContext<'_> {
         let bucket_value = ((hash_value as f64) / (u32::MAX as f64) * MAX_OF_RANGE) as u64;
 
         // Get the variation according to the traffic allocation
-        let result = experiment
-            .traffic_allocation()
-            .get_variation_for_bucket(bucket_value);
+        let result = experiment.traffic_allocation().variation(bucket_value);
 
         match result {
-            Some(variation) => {
+            Some(variation_id) => {
                 if send_decision {
                     #[cfg(feature = "online")]
                     {
                         // Send out a decision event as a side effect
                         let account_id = self.client.account_id();
                         let campaign_id = experiment.campaign_id();
-                        let variation_id = variation.id();
 
                         // Create event_api::Event to send to dispatcher
                         let decision_event =
@@ -209,7 +211,9 @@ impl UserContext<'_> {
                         self.client.event_dispatcher().send_event(decision_event);
                     }
                 }
-                Some(variation)
+
+                // Find the variation belonging to this variation ID
+                experiment.variation(variation_id)
             }
             None => None,
         }
