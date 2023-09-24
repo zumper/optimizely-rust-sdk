@@ -29,8 +29,8 @@ mod user;
 ///     .build();
 ///
 /// // Use methods of client struct
-/// let account_id = optimizely_client.account_id();
-/// let revision = optimizely_client.revision();
+/// let account_id = optimizely_client.datafile().account_id();
+/// let revision = optimizely_client.datafile().revision();
 /// let user_context = optimizely_client.create_user_context(user_id);
 ///
 /// # Ok::<(), Box<dyn std::error::Error>>(())
@@ -57,18 +57,8 @@ impl Client {
         UserContext::new(self, user_id, attributes)
     }
 
-    /// Get the current Optimizely account id
-    pub fn account_id(&self) -> &str {
-        self.datafile.account_id()
-    }
-
-    /// Get the current revision of the datafile
-    pub fn revision(&self) -> u32 {
-        self.datafile.revision()
-    }
-
     /// Get the datafile within the client
-    pub(crate) fn datafile(&self) -> &Datafile {
+    pub fn datafile(&self) -> &Datafile {
         &self.datafile
     }
 

@@ -67,7 +67,7 @@ impl UserContext<'_> {
     }
 
     /// Add a new attribute to a user context
-    pub fn set_attribute<T: Into<String>>(&mut self, key: &str, value: T) {
+    pub fn set_attribute<T: Into<String>>(&mut self, key: T, value: T) {
         // Create owned copies of the key and value
         let key = key.into();
         let value = value.into();
@@ -96,7 +96,7 @@ impl UserContext<'_> {
 
                 // Send out a decision event as a side effect
                 let user_id = self.user_id();
-                let account_id = self.client.account_id();
+                let account_id = self.client.datafile().account_id();
                 let event_id = event.id();
 
                 // Create event_api::Event to send to dispatcher
@@ -200,7 +200,7 @@ impl UserContext<'_> {
                     #[cfg(feature = "online")]
                     {
                         // Send out a decision event as a side effect
-                        let account_id = self.client.account_id();
+                        let account_id = self.client.datafile().account_id();
                         let campaign_id = experiment.campaign_id();
 
                         // Create event_api::Event to send to dispatcher

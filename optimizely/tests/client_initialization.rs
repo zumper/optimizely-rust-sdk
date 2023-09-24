@@ -118,8 +118,8 @@ fn with_fixed_datafile() {
         .build();
 
     // Check account id property on client
-    assert_eq!(client.account_id(), ACCOUNT_ID);
+    assert_eq!(client.datafile().account_id(), ACCOUNT_ID);
 
     // Check revision property on client
-    assert_eq!(client.revision(), REVISION);
+    assert_eq!(client.datafile().revision(), REVISION);
 }
