@@ -10,13 +10,13 @@ This SDK only includes a small subset of features compared to supported SDKs. Us
 ## Example
 
 ```rust
-use optimizely::ClientBuilder;
+use optimizely::{event_api::BatchedEventDispatcher, Client};
 
 // Initialize Optimizely client using local datafile
 let file_path = "../datafiles/sandbox.json";
-let optimizely_client = ClientBuilder::new()
-    .with_local_datafile(file_path)?
-    .build();
+let optimizely_client = Client::from_local_datafile(file_path)?
+    .with_event_dispatcher(BatchedEventDispatcher::default())
+    .initialize();
 
 // Create user context for current user
 let user_id = "123abc789xyz";

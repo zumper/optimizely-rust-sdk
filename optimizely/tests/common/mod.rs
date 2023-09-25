@@ -6,8 +6,8 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 // Imports from Optimizely crate
-use optimizely::client::{Client, ClientBuilder};
 use optimizely::event_api::{Event, EventDispatcher};
+use optimizely::Client;
 
 // This is the account ID of mark.biesheuvel@optimizely.com
 pub const ACCOUNT_ID: &str = "21537940595";
@@ -53,18 +53,17 @@ pub struct TestContext {
     pub event_list: EventList,
 }
 
-// A setup function used in mutliple tests
+// A setup function used in multiple tests
 pub(super) fn setup() -> TestContext {
     // Create a struct to store events
     let event_store = EventStore::default();
     let event_list = event_store.list();
 
     // Build client
-    let client = ClientBuilder::new()
-        .with_event_dispatcher(event_store)
-        .with_local_datafile(FILE_PATH)
+    let client = Client::from_local_datafile(FILE_PATH)
         .expect("local datafile should work")
-        .build();
+        .with_event_dispatcher(event_store)
+        .initialize();
 
     TestContext { client, event_list }
 }

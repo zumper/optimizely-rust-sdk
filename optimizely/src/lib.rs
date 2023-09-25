@@ -2,7 +2,7 @@
 #![warn(missing_docs)]
 
 // Reimport/export of structs to make them available at top-level
-pub use client::ClientBuilder;
+pub use client::Client;
 
 // Regular modules
 pub mod client;

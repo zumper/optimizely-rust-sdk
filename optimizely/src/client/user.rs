@@ -24,13 +24,12 @@ const MAX_OF_RANGE: f64 = 10_000_f64;
 /// User specific context
 ///
 /// ```
-/// use optimizely::{ClientBuilder, decision::DecideOptions};
+/// use optimizely::{Client, decision::DecideOptions};
 ///
 /// // Initialize Optimizely client using local datafile
 /// let file_path = "../datafiles/sandbox.json";
-/// let optimizely_client = ClientBuilder::new()
-///     .with_local_datafile(file_path)?
-///     .build();
+/// let optimizely_client = Client::from_local_datafile(file_path)?
+///     .initialize();
 ///
 /// // Do not send any decision events
 /// let decide_options = DecideOptions {

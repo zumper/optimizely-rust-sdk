@@ -1,4 +1,4 @@
-use optimizely::{event_api::BatchedEventDispatcher, ClientBuilder};
+use optimizely::{event_api::BatchedEventDispatcher, Client};
 use rand::random;
 use std::error::Error;
 use std::thread::sleep;
@@ -21,10 +21,9 @@ fn random_event_does_happen(chance: f32) -> bool {
 
 fn main() -> Result<(), Box<dyn Error>> {
     // Initiate client using SDK key and batched event dispatcher
-    let client = ClientBuilder::new()
-        .with_sdk_key(SDK_KEY)?
+    let client = Client::from_sdk_key(SDK_KEY)?
         .with_event_dispatcher(BatchedEventDispatcher::default())
-        .build();
+        .initialize();
 
     // Not super accurate interval, but fine for this example
     let interval = Duration::from_millis(166);

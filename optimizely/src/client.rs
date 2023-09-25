@@ -2,31 +2,29 @@
 
 // Imports from crate
 use crate::datafile::Datafile;
-
 #[cfg(feature = "online")]
 use crate::event_api::EventDispatcher;
 
 // Relative imports of sub modules
-pub use builder::{ClientBuilder, Empty, Ready};
 pub use error::ClientError;
+pub use initialization::UninitializedClient;
 pub use user::{UserAttributes, UserContext};
 
-mod builder;
 mod error;
+mod initialization;
 mod user;
 
 /// SDK client to use Optimizely Feature Experimentation
 ///
 /// ```
-/// use optimizely::ClientBuilder;
+/// use optimizely::Client;
 /// #
 /// # let file_path = "../datafiles/sandbox.json";
 /// # let user_id = "123abc789xyz";
 ///
 /// // Initialize Optimizely client using local datafile
-/// let optimizely_client = ClientBuilder::new()
-///     .with_local_datafile(file_path)?
-///     .build();
+/// let optimizely_client = Client::from_local_datafile(file_path)?
+///     .initialize();
 ///
 /// // Use methods of client struct
 /// let account_id = optimizely_client.datafile().account_id();
