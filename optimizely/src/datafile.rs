@@ -1,5 +1,6 @@
 //! Parsing the Optimizely datafile
 
+use std::collections::HashMap;
 // External imports
 use error_stack::{IntoReport, Result, ResultExt};
 
@@ -59,6 +60,11 @@ impl Datafile {
     /// Get the flag with the given key
     pub fn flag(&self, flag_key: &str) -> Option<&FeatureFlag> {
         self.0.feature_flags().get(flag_key)
+    }
+
+    /// Get all experiments
+    pub fn experiments(&self) -> &HashMap<String, Experiment> {
+        self.0.experiments()
     }
 
     /// Get the experiment with the given experiment ID
