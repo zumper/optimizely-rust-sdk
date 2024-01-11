@@ -21,7 +21,7 @@ mod experiment;
 mod feature_flag;
 mod rollout;
 mod traffic_allocation;
-mod variation;
+pub mod variation;
 
 /// The datafile contains all the feature flags, experiments, events and other configuration from an Optimizely account.
 ///
