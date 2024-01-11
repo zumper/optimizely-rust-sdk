@@ -174,7 +174,7 @@ impl UserContext<'_> {
         }
     }
 
-    fn decide_variation_for_experiment<'a>(
+    pub fn decide_variation_for_experiment<'a>(
         &'a self, experiment: &'a Experiment, send_decision: bool,
     ) -> Option<&Variation> {
         // Use references for the ids
