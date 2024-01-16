@@ -1,6 +1,7 @@
 // External imports
-use fasthash::murmur3::hash32_with_seed as murmur3_hash;
+use murmur3::murmur3_32 as murmur3_hash;
 use std::collections::HashMap;
+use std::io::Cursor;
 
 // Imports from crate
 use crate::datafile::{Experiment, FeatureFlag, Variation};
@@ -173,7 +174,7 @@ impl UserContext<'_> {
         }
     }
 
-    fn decide_variation_for_experiment<'a>(
+    pub fn decide_variation_for_experiment<'a>(
         &'a self, experiment: &'a Experiment, send_decision: bool,
     ) -> Option<&Variation> {
         // Use references for the ids
@@ -185,7 +186,13 @@ impl UserContext<'_> {
 
         // To hash the bucket key it needs to be converted to an array of `u8` bytes
         // Use Murmur3 (32-bit) with seed
-        let hash_value = murmur3_hash(bucketing_key.as_bytes(), HASH_SEED);
+        let hash_value = match murmur3_hash(&mut Cursor::new(&bucketing_key), HASH_SEED) {
+            Ok(value) => value,
+            Err(_e) => {
+                log::warn!("Unable to create hash for bucketing_key={}", &bucketing_key);
+                return None;
+            }
+        };
 
         // Bring the hash into a range of 0 to 10_000
         let bucket_value = ((hash_value as f64) / (u32::MAX as f64) * MAX_OF_RANGE) as u64;

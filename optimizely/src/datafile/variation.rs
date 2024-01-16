@@ -15,8 +15,12 @@ pub struct Variation {
     id: String,
     #[serde()]
     key: String,
-    #[serde(rename = "featureEnabled")]
+    #[serde(rename = "featureEnabled", default = "default_as_true")]
     is_feature_enabled: bool,
+}
+
+fn default_as_true() -> bool {
+    true
 }
 
 impl Variation {
