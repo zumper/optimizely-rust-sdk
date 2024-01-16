@@ -186,7 +186,13 @@ impl UserContext<'_> {
 
         // To hash the bucket key it needs to be converted to an array of `u8` bytes
         // Use Murmur3 (32-bit) with seed
-        let hash_value = murmur3_hash(&mut Cursor::new(bucketing_key), HASH_SEED).unwrap();
+        let hash_value = match murmur3_hash(&mut Cursor::new(&bucketing_key), HASH_SEED) {
+            Ok(value) => value,
+            Err(_e) => {
+                log::warn!("Unable to create hash for bucketing_key={}", &bucketing_key);
+                return None;
+            }
+        };
 
         // Bring the hash into a range of 0 to 10_000
         let bucket_value = ((hash_value as f64) / (u32::MAX as f64) * MAX_OF_RANGE) as u64;
