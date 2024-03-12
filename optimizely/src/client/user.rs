@@ -1,5 +1,7 @@
 // External imports
 use murmur3::murmur3_32 as murmur3_hash;
+use serde::Serialize;
+use serde_json::value::Number;
 use std::collections::HashMap;
 use std::io::Cursor;
 
@@ -13,8 +15,90 @@ use crate::event_api;
 // Imports from super
 use super::Client;
 
+#[derive(Clone, Debug, PartialEq)]
+pub enum AttributeValue {
+    Null,
+    String(String),
+    Number(Number),
+    Bool(bool),
+}
+
+impl From<bool> for AttributeValue {
+    fn from(value: bool) -> Self {
+        AttributeValue::Bool(value)
+    }
+}
+
+impl From<&str> for AttributeValue {
+    fn from(value: &str) -> Self {
+        AttributeValue::String(value.into())
+    }
+}
+
+impl From<i32> for AttributeValue {
+    fn from(value: i32) -> Self {
+        AttributeValue::Number(value.into())
+    }
+}
+
+impl From<f64> for AttributeValue {
+    fn from(value: f64) -> Self {
+        if let Some(number) = Number::from_f64(value) {
+            return AttributeValue::Number(number);
+        }
+        log::warn!("NaN and +/- Infinity are not supported in AttributeValue::Number");
+        AttributeValue::Null
+    }
+}
+
+impl Serialize for AttributeValue {
+    #[inline]
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        match self {
+            AttributeValue::Null => serializer.serialize_none(),
+            AttributeValue::Bool(value) => value.serialize(serializer),
+            AttributeValue::String(value) => value.serialize(serializer),
+            AttributeValue::Number(value) => value.serialize(serializer),
+        }
+    }
+}
+
+impl AttributeValue {
+    /// If the `Value` is a Boolean, returns the associated bool. Returns None
+    /// otherwise.
+    pub fn as_bool(&self) -> Option<&bool> {
+        match self {
+            AttributeValue::Bool(b) => Some(b),
+            _ => None,
+        }
+    }
+    /// If the `Value` is a String, returns the associated str. Returns None
+    /// otherwise.
+    pub fn as_str(&self) -> Option<&str> {
+        match self {
+            AttributeValue::String(s) => Some(s),
+            _ => None,
+        }
+    }
+    /// If the `Value` is a Number, returns the associated [`Number`]. Returns
+    /// None otherwise.
+    pub fn as_number(&self) -> Option<&Number> {
+        match self {
+            AttributeValue::Number(number) => Some(number),
+            _ => None,
+        }
+    }
+    /// Returns true if the `Value` is Null
+    pub fn is_null(&self) -> bool {
+        matches!(self, AttributeValue::Null)
+    }
+}
+
 /// Custom type alias for user attributes
-pub type UserAttributes = HashMap<String, String>;
+pub type UserAttributes = HashMap<String, AttributeValue>;
 
 /// Constant used for the hashing algorithm
 const HASH_SEED: u32 = 1;
@@ -67,13 +151,12 @@ impl UserContext<'_> {
     }
 
     /// Add a new attribute to a user context
-    pub fn set_attribute<T: Into<String>>(&mut self, key: T, value: T) {
+    pub fn set_attribute<K: Into<String>, V: Into<AttributeValue>>(&mut self, key: K, value: V) {
         // Create owned copies of the key and value
         let key = key.into();
-        let value = value.into();
 
         // Add the attribute
-        self.attributes.insert(key, value);
+        self.attributes.insert(key, value.into());
     }
 
     /// Get the id of a user
