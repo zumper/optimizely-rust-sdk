@@ -8,7 +8,7 @@ use crate::event_api::EventDispatcher;
 // Relative imports of sub modules
 pub use error::ClientError;
 pub use initialization::UninitializedClient;
-pub use user::{UserAttributes, UserContext};
+pub use user::{AttributeValue, UserAttributes, UserContext};
 
 mod error;
 mod initialization;
