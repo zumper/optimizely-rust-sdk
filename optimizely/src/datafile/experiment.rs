@@ -3,7 +3,7 @@ use serde::{Deserialize, Deserializer};
 use std::collections::HashMap;
 
 // Imports from super
-use super::{TrafficAllocation, Variation};
+use super::{BooleanCondition, TrafficAllocation, Variation};
 
 #[derive(Deserialize, Debug)]
 pub struct Experiment {
@@ -11,6 +11,10 @@ pub struct Experiment {
     id: String,
     #[serde()]
     key: String,
+    #[serde(rename = "audienceConditions")]
+    audience_conditions: Option<BooleanCondition<String>>,
+    #[serde(rename = "audienceIds")]
+    audience_ids: Vec<String>,
     #[serde(rename = "layerId")]
     campaign_id: String,
     #[serde(rename = "trafficAllocation", deserialize_with = "TrafficAllocation::deserialize")]
@@ -54,5 +58,28 @@ impl Experiment {
 
     pub fn variation(&self, variation_id: &str) -> Option<&Variation> {
         self.variations.get(variation_id)
+    }
+
+    pub fn evaluate_audience_conditions<E>(&self, evaluator: &E) -> bool
+    where
+        E: Fn(&String) -> bool,
+    {
+        if let Some(conditions) = &self.audience_conditions {
+            if conditions.is_empty() {
+                return true;
+            }
+            return conditions.evaluate(evaluator);
+        } else {
+            let conditions = BooleanCondition::Or(
+                self.audience_ids
+                    .iter()
+                    .map(|id| Box::new(BooleanCondition::Single(id.into())))
+                    .collect(),
+            );
+            if conditions.is_empty() {
+                return true;
+            }
+            return conditions.evaluate(evaluator);
+        }
     }
 }

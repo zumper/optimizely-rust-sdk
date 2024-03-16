@@ -1,8 +1,16 @@
 // Imports from Optimizely crate
-use optimizely::{client::ClientError, datafile::DatafileError, Client};
+use optimizely::{
+    client::ClientError,
+    datafile::{
+        AudienceCondition, BooleanCondition, CustomAttributeCondition, DatafileError, ExactCondition,
+        SubstringCondition,
+    },
+    Client,
+};
 
 // Relative imports of sub modules
 use common::{ACCOUNT_ID, FILE_PATH, REVISION};
+use serde_json::Value;
 mod common;
 
 #[test]
@@ -111,4 +119,31 @@ fn with_fixed_datafile() {
 
     // Check revision property on client
     assert_eq!(client.datafile().revision(), REVISION);
+
+    assert_eq!(client.datafile().audience("13858570732").unwrap().name(), "[Web] Desktop Only");
+    assert_eq!(
+        *client
+            .datafile()
+            .audience("13858570732")
+            .unwrap()
+            .conditions(),
+        BooleanCondition::And(vec![
+            Box::new(BooleanCondition::Or(vec![Box::new(BooleanCondition::Or(vec![Box::new(
+                BooleanCondition::Single(AudienceCondition::CustomAttribute(CustomAttributeCondition::Exact(
+                    ExactCondition {
+                        name: "isMobile".into(),
+                        value: Value::Bool(false),
+                    }
+                )))
+            )]))])),
+            Box::new(BooleanCondition::Or(vec![Box::new(BooleanCondition::Or(vec![Box::new(
+                BooleanCondition::Single(AudienceCondition::CustomAttribute(CustomAttributeCondition::Substring(
+                    SubstringCondition {
+                        name: "platform".into(),
+                        value: "web".into(),
+                    }
+                )))
+            )]))])),
+        ])
+    );
 }
