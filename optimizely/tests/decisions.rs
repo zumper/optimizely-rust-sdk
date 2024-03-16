@@ -1,3 +1,9 @@
+// Imports from Optimizely crate
+use optimizely::{
+    datafile::{AudienceCondition, BooleanCondition},
+    user_attributes,
+};
+
 // Relative imports of sub modules
 use common::setup;
 mod common;
@@ -99,4 +105,182 @@ fn invalid_flag() {
 
     // Since this key does not exist, no events should be dispatched
     assert_eq!(ctx.event_list.borrow().len(), 0);
+}
+
+#[test]
+fn audience_evaluation() {
+    let ctx = setup();
+
+    // Create user context with given attributes
+    let mweb_user_context = ctx.client.create_user_context_with_attributes(
+        "user123",
+        user_attributes! {
+            "isMobile" => true,
+            "platform" => "web",
+        },
+    );
+    let dweb_user_context = ctx.client.create_user_context_with_attributes(
+        "user123",
+        user_attributes! {
+            "isMobile" => false,
+            "platform" => "web",
+        },
+    );
+    let dios_user_context = ctx.client.create_user_context_with_attributes(
+        "user123",
+        user_attributes! {
+            "isMobile" => false,
+            "platform" => "ios",
+        },
+    );
+    let missing_attrs_user_context = ctx
+        .client
+        .create_user_context_with_attributes("user123", user_attributes! {});
+    let wrong_type_user_context = ctx.client.create_user_context_with_attributes(
+        "user123",
+        user_attributes! {
+            "isMobile" => "false",
+            "platform" => "web",
+        },
+    );
+
+    let web_desktop_only_experiment = ctx.client.datafile().experiment("9300000125242").unwrap();
+
+    assert!(!mweb_user_context.is_in_audience_of(web_desktop_only_experiment));
+    assert!(mweb_user_context
+        .decide_variation_for_experiment(web_desktop_only_experiment, false)
+        .is_none());
+
+    assert!(dweb_user_context.is_in_audience_of(web_desktop_only_experiment));
+    assert_eq!(
+        dweb_user_context
+            .decide_variation_for_experiment(web_desktop_only_experiment, false)
+            .unwrap()
+            .key(),
+        "treatment"
+    );
+
+    assert!(!dios_user_context.is_in_audience_of(web_desktop_only_experiment));
+    assert!(dios_user_context
+        .decide_variation_for_experiment(web_desktop_only_experiment, false)
+        .is_none());
+
+    assert!(!missing_attrs_user_context.is_in_audience_of(web_desktop_only_experiment));
+    assert!(missing_attrs_user_context
+        .decide_variation_for_experiment(web_desktop_only_experiment, false)
+        .is_none());
+
+    assert!(!wrong_type_user_context.is_in_audience_of(web_desktop_only_experiment));
+    assert!(wrong_type_user_context
+        .decide_variation_for_experiment(web_desktop_only_experiment, false)
+        .is_none());
+}
+
+#[test]
+fn audience_evaluation__empty_or_is_false() {
+    let attrs = user_attributes!();
+    let empty_or: BooleanCondition<AudienceCondition> = serde_json::from_str("[\"or\"]").unwrap();
+    assert!(!empty_or.evaluate(&|condition| condition.evaluate(&attrs)));
+}
+
+#[test]
+fn audience_evaluation__empty_and_is_true() {
+    let attrs = user_attributes!();
+    let empty_and: BooleanCondition<AudienceCondition> = serde_json::from_str("[\"and\"]").unwrap();
+    assert!(empty_and.evaluate(&|condition| condition.evaluate(&attrs)));
+}
+
+#[test]
+fn audience_evaluation__and_requires_all() {
+    let empty_and: BooleanCondition<AudienceCondition> = serde_json::from_str(
+        "[
+        \"and\",
+        {\"type\":\"custom_attribute\",\"match\":\"gt\",\"name\":\"age\",\"value\":3},
+        {\"type\":\"custom_attribute\",\"match\":\"exists\",\"name\":\"isMobile\",\"value\":null},
+        {\"type\":\"custom_attribute\",\"match\":\"substring\",\"name\":\"platform\",\"value\":\"web\"}
+    ]",
+    )
+    .unwrap();
+    assert!(!empty_and.evaluate(&|condition| condition.evaluate(&user_attributes!())));
+    assert!(!empty_and
+        .evaluate(&|condition| condition.evaluate(&user_attributes! {"age"=>"4","isMobile"=>false,"platform"=>"web"}))); // age is not a number
+    assert!(!empty_and.evaluate(&|condition| condition.evaluate(&user_attributes! {"age"=>4,"isMobile"=>false}))); // platform is missing
+    assert!(!empty_and.evaluate(&|condition| condition.evaluate(&user_attributes! {"age"=>4,"platform"=>"web"}))); // isMobile is missing
+    assert!(!empty_and
+        .evaluate(&|condition| condition.evaluate(&user_attributes! {"age"=>-7,"isMobile"=>true,"platform"=>"web"}))); // age is too low
+    assert!(!empty_and
+        .evaluate(&|condition| condition.evaluate(&user_attributes! {"age"=>3,"isMobile"=>true,"platform"=>"web"}))); // age is too low
+    assert!(empty_and
+        .evaluate(&|condition| condition.evaluate(&user_attributes! {"age"=>3.1,"isMobile"=>false,"platform"=>"web"})));
+    assert!(empty_and.evaluate(
+        &|condition| condition.evaluate(&user_attributes! {"age"=>4,"isMobile"=>true,"platform"=>"some website"})
+    ));
+    assert!(empty_and.evaluate(
+        &|condition| condition.evaluate(&user_attributes! {"age"=>10,"isMobile"=>true,"platform"=>"some website"})
+    ));
+}
+
+#[test]
+fn audience_evaluation__or_requires_any() {
+    let empty_and: BooleanCondition<AudienceCondition> = serde_json::from_str(
+        "[
+        \"or\",
+        {\"type\":\"custom_attribute\",\"match\":\"gt\",\"name\":\"age\",\"value\":3},
+        {\"type\":\"custom_attribute\",\"match\":\"exists\",\"name\":\"isMobile\",\"value\":null},
+        {\"type\":\"custom_attribute\",\"match\":\"substring\",\"name\":\"platform\",\"value\":\"web\"}
+    ]",
+    )
+    .unwrap();
+    assert!(!empty_and.evaluate(&|condition| condition.evaluate(&user_attributes!())));
+    assert!(!empty_and.evaluate(&|condition| condition.evaluate(&user_attributes! {"age"=>"4"})));
+    assert!(empty_and.evaluate(&|condition| condition.evaluate(&user_attributes! {"age"=>4})));
+    assert!(empty_and.evaluate(&|condition| condition.evaluate(&user_attributes! {"isMobile"=>"whoops"})));
+    assert!(empty_and.evaluate(&|condition| condition.evaluate(&user_attributes! {"platform"=>"web"})));
+    assert!(!empty_and.evaluate(&|condition| condition.evaluate(&user_attributes! {"platform"=>"weeeb"})));
+    assert!(empty_and
+        .evaluate(&|condition| condition.evaluate(&user_attributes! {"age"=>"4","isMobile"=>false,"platform"=>"web"})));
+    assert!(empty_and.evaluate(&|condition| condition.evaluate(&user_attributes! {"age"=>4,"isMobile"=>false})));
+    assert!(empty_and.evaluate(&|condition| condition.evaluate(&user_attributes! {"age"=>4,"platform"=>"web"})));
+    assert!(empty_and
+        .evaluate(&|condition| condition.evaluate(&user_attributes! {"age"=>-7,"isMobile"=>true,"platform"=>"web"})));
+    assert!(empty_and
+        .evaluate(&|condition| condition.evaluate(&user_attributes! {"age"=>3,"isMobile"=>true,"platform"=>"web"})));
+    assert!(empty_and
+        .evaluate(&|condition| condition.evaluate(&user_attributes! {"age"=>3.1,"isMobile"=>false,"platform"=>"web"})));
+    assert!(empty_and.evaluate(
+        &|condition| condition.evaluate(&user_attributes! {"age"=>4,"isMobile"=>true,"platform"=>"some website"})
+    ));
+    assert!(empty_and.evaluate(
+        &|condition| condition.evaluate(&user_attributes! {"age"=>10,"isMobile"=>true,"platform"=>"some website"})
+    ));
+}
+
+#[test]
+fn audience_evaluation__combinations() {
+    let empty_and: BooleanCondition<AudienceCondition> = serde_json::from_str(
+        "[
+        \"or\",
+        [
+            \"and\",
+            {\"type\":\"custom_attribute\",\"match\":\"gt\",\"name\":\"age\",\"value\":3},
+            {\"type\":\"custom_attribute\",\"match\":\"exact\",\"name\":\"isMobile\",\"value\":true}
+        ],
+        [
+            \"and\",
+            [
+                \"not\",
+                {\"type\":\"custom_attribute\",\"match\":\"gt\",\"name\":\"age\",\"value\":3}
+            ],
+            {\"type\":\"custom_attribute\",\"match\":\"exact\",\"name\":\"isMobile\",\"value\":false}
+        ]
+    ]",
+    )
+    .unwrap();
+    assert!(!empty_and.evaluate(&|condition| condition.evaluate(&user_attributes!())));
+    assert!(!empty_and.evaluate(&|condition| condition.evaluate(&user_attributes! {"age"=>"4", "isMobile"=>true})));
+    assert!(!empty_and.evaluate(&|condition| condition.evaluate(&user_attributes! {"age"=>4})));
+    assert!(empty_and.evaluate(&|condition| condition.evaluate(&user_attributes! {"age"=>4,"isMobile"=>true})));
+    assert!(!empty_and.evaluate(&|condition| condition.evaluate(&user_attributes! {"age"=>4,"isMobile"=>"whoops"})));
+    assert!(empty_and.evaluate(&|condition| condition.evaluate(&user_attributes! {"age"=>3,"isMobile"=>false})));
+    assert!(empty_and.evaluate(&|condition| condition.evaluate(&user_attributes! {"age"=>2,"isMobile"=>false})));
 }

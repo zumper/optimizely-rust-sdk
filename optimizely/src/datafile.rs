@@ -5,6 +5,11 @@ use std::collections::HashMap;
 use error_stack::{IntoReport, Result, ResultExt};
 
 // Relative imports of sub modules
+use audience::Audience;
+pub use audience_condition::{
+    AudienceCondition, CustomAttributeCondition, ExactCondition, ExistsCondition, NumericCondition, SubstringCondition,
+};
+pub use boolean_condition::BooleanCondition;
 use environment::Environment;
 pub use error::DatafileError;
 use event::Event;
@@ -14,6 +19,9 @@ use rollout::Rollout;
 use traffic_allocation::TrafficAllocation;
 pub(crate) use variation::Variation;
 
+mod audience;
+mod audience_condition;
+mod boolean_condition;
 mod environment;
 mod error;
 mod event;
@@ -80,5 +88,9 @@ impl Datafile {
     /// Get the event with the given key
     pub fn event(&self, event_key: &str) -> Option<&Event> {
         self.0.events().get(event_key)
+    }
+
+    pub fn audience(&self, audience_id: &str) -> Option<&Audience> {
+        self.0.audiences().get(audience_id)
     }
 }

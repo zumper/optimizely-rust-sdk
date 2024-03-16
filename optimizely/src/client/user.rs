@@ -260,6 +260,9 @@ impl UserContext<'_> {
     pub fn decide_variation_for_experiment<'a>(
         &'a self, experiment: &'a Experiment, send_decision: bool,
     ) -> Option<&Variation> {
+        if !self.is_in_audience_of(experiment) {
+            return None;
+        }
         // Use references for the ids
         let user_id = self.user_id();
         let experiment_id = experiment.id();
@@ -306,6 +309,17 @@ impl UserContext<'_> {
             }
             None => None,
         }
+    }
+
+    pub fn is_in_audience_of<'a>(&'a self, experiment: &'a Experiment) -> bool {
+        experiment.evaluate_audience_conditions(&|audience_id| {
+            if let Some(audience) = self.client.datafile().audience(&audience_id) {
+                return audience
+                    .conditions()
+                    .evaluate(&|condition| condition.evaluate(&self.attributes));
+            }
+            return false;
+        })
     }
 }
 

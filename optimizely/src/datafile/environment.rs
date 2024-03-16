@@ -3,7 +3,7 @@ use serde::{Deserialize, Deserializer};
 use std::collections::HashMap;
 
 // Imports from super
-use super::{Event, Experiment, FeatureFlag, Rollout};
+use super::{Audience, Event, Experiment, FeatureFlag, Rollout};
 
 #[derive(Deserialize, Debug)]
 pub struct Environment {
@@ -19,6 +19,8 @@ pub struct Environment {
     bot_filtering: bool,
     #[serde(rename = "anonymizeIP")]
     anonymize_ip: bool,
+    #[serde(rename = "typedAudiences", deserialize_with = "Audience::deserialize")]
+    audiences: HashMap<String, Audience>,
     #[serde(rename = "events", deserialize_with = "Event::deserialize")]
     events: HashMap<String, Event>,
     #[serde(deserialize_with = "Experiment::deserialize")]
@@ -67,6 +69,10 @@ impl Environment {
     #[allow(dead_code)]
     pub fn anonymize_ip(&self) -> bool {
         self.anonymize_ip
+    }
+
+    pub fn audiences(&self) -> &HashMap<String, Audience> {
+        &self.audiences
     }
 
     pub fn feature_flags(&self) -> &HashMap<String, FeatureFlag> {
