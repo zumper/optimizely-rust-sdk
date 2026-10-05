@@ -28,9 +28,9 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
-      - name: Test with the existing Rust toolchain
+      - name: Test with the stable Rust toolchain
         run: |
-          docker run --rm -v "$GITHUB_WORKSPACE:/workspace" -w /workspace rust:1.76.0 bash -euc 'cargo --version; cargo test'
+          docker run --rm -v "$GITHUB_WORKSPACE:/workspace" -w /workspace rust:slim bash -euc 'cargo --version; cargo test'
   test:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: [self-hosted, light]
