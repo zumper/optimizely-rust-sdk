@@ -49,3 +49,5 @@ A list of the features that are currently included:
 - [ ] Variation variables
 - [ ] Forced decision methods
 - [ ] Mutual exclusion groups
+
+CI is provided by [GitHub Actions](docs/github-actions-ci.md).

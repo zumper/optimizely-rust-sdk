@@ -1,0 +1,47 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+env:
+  CIRCLE_SHA1: ${{ github.event.pull_request.head.sha || github.sha }}
+  CIRCLE_BRANCH: ${{ github.head_ref || github.ref_name }}
+  CI_BRANCH: ${{ github.head_ref || github.ref_name }}
+jobs:
+  build:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: [self-hosted, light]
+    timeout-minutes: 20
+    steps:
+      - name: Restore workspace ownership
+        run: |
+          if [[ -d "$GITHUB_WORKSPACE" ]]; then
+            sudo -n chown -hR -- "$(id -u):$(id -g)" "$GITHUB_WORKSPACE"
+          fi
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Test with the existing Rust toolchain
+        run: |
+          docker run --rm -v "$GITHUB_WORKSPACE:/workspace" -w /workspace rust:1.76.0 bash -euc 'cargo --version; cargo test'
+  test:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: [self-hosted, light]
+    timeout-minutes: 30
+    steps:
+      - name: Restore workspace ownership
+        run: |
+          if [[ -d "$GITHUB_WORKSPACE" ]]; then sudo -n chown -hR -- "$(id -u):$(id -g)" "$GITHUB_WORKSPACE"; fi
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Retain the stable-toolchain all-features release test
+        run: docker run --rm -v "$GITHUB_WORKSPACE:/workspace" -w /workspace rust:slim bash -euc 'cargo test --all-features --release'
